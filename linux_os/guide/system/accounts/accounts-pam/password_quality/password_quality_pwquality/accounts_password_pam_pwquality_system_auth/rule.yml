@@ -16,16 +16,15 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-85874-6
     cce@rhel8: CCE-85872-0
     cce@rhel9: CCE-85873-8
+    cce@rhel10: CCE-89362-8
 
 references:
     disa: CCI-000366
     srg: SRG-OS-000480-GPOS-00227
     stigid@ol8: OL08-00-020101
     stigid@rhel8: RHEL-08-020101
-    stigid@rhel9: RHEL-09-611045
 
 ocil_clause: 'pam_pwquality.so is not enabled in system-auth'
 

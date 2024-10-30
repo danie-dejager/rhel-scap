@@ -12,19 +12,18 @@ rationale: |-
 
 severity: medium
 
-platform: machine
+platform: system_with_kernel
 
 identifiers:
-    cce@rhel7: CCE-83334-3
     cce@rhel8: CCE-83335-0
     cce@rhel9: CCE-84140-3
+    cce@rhel10: CCE-88179-7
     cce@sle12: CCE-91673-4
     cce@sle15: CCE-91305-3
 
 references:
     cis@sle12: 2.2.17
     cis@sle15: 2.2.17
-    pcidss4: "2.2.4"
 
 ocil_clause: |-
     {{{ ocil_clause_service_disabled(service="rsyncd") }}}
@@ -37,8 +36,8 @@ template:
     vars:
         servicename: rsyncd
         packagename: rsync-daemon
-        packagename@rhel7: rsync
         packagename@ol7: rsync
         packagename@sle12: rsync
         packagename@sle15: rsync
         packagename@openeuler2203: rsync
+        packagename@kylinserver10: rsync

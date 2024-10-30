@@ -158,25 +158,44 @@ class OVALDocument(OVALContainer):
 
         root = self._get_oval_definition_el()
         root.append(self._get_generator_el())
-        root.append(
-            self._get_component_el(
-                "definitions", self.definitions, definitions_selection
+        if definitions_selection:
+            root.append(
+                self._get_component_el(
+                    "definitions", self.definitions, definitions_selection)
             )
-        )
-        root.append(self._get_component_el("tests", self.tests, tests_selection))
-        root.append(self._get_component_el("objects", self.objects, objects_selection))
+        if tests_selection:
+            root.append(
+                self._get_component_el(
+                    "tests", self.tests, tests_selection)
+            )
+        if objects_selection:
+            root.append(
+                self._get_component_el(
+                    "objects", self.objects, objects_selection)
+            )
         if states_selection:
-            root.append(self._get_component_el("states", self.states, states_selection))
+            root.append(
+                self._get_component_el(
+                    "states", self.states, states_selection)
+            )
         if variables_selection:
             root.append(
-                self._get_component_el("variables", self.variables, variables_selection)
+                self._get_component_el(
+                    "variables", self.variables, variables_selection)
             )
         return root
+
+    def is_empty(self):
+        return all([
+            len(self.definitions) == 0,
+            len(self.tests) == 0,
+            len(self.objects) == 0,
+        ])
 
     def save_as_xml(self, fd, oval_definition_references=None):
         root = self.get_xml_element(oval_definition_references)
         if hasattr(ElementTree, "indent"):
-            ElementTree.indent(root, space=" ", level=0)
+            ElementTree.indent(root, space="  ", level=0)
         ElementTree.ElementTree(root).write(fd, xml_declaration=True, encoding="utf-8")
 
     def _get_component_el(self, tag, component_dict, id_selection):

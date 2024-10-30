@@ -14,14 +14,13 @@ rationale: |-
 severity: low
 
 identifiers:
-    cce@rhel7: CCE-80326-2
     cce@rhel8: CCE-82408-6
     cce@rhel9: CCE-86505-5
+    cce@rhel10: CCE-87806-6
     cce@sle12: CCE-91642-9
     cce@sle15: CCE-91285-7
 
 references:
-    ccn@rhel9: A.8.SEC-RHEL4
     cis-csc: 11,14,3,9
     cis@sle12: 2.2.9
     cis@sle15: 2.2.9

@@ -31,10 +31,7 @@ severity: medium
 identifiers:
     cce@rhel8: CCE-87272-1
     cce@rhel9: CCE-86137-7
-
-references:
-    ccn@rhel9: A.8.SEC-RHEL3
-    pcidss4: "1.4.1"
+    cce@rhel10: CCE-89320-6
 
 ocil_clause: 'loopback traffic is not restricted'
 

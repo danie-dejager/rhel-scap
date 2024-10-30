@@ -18,9 +18,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-27432-4
     cce@rhel8: CCE-80848-5
     cce@rhel9: CCE-84157-7
+    cce@rhel10: CCE-90657-8
     cce@sle12: CCE-91456-4
     cce@sle15: CCE-91432-5
 
@@ -30,7 +30,6 @@ references:
     cis@ubuntu2004: 2.3.3
     cis@ubuntu2204: 2.3.3
     hipaa: 164.308(a)(4)(i),164.308(b)(1),164.308(b)(3),164.310(b),164.312(e)(1),164.312(e)(2)(ii)
-    pcidss4: "2.2.4"
 
 {{{ complete_ocil_entry_package(package="talk") }}}
 

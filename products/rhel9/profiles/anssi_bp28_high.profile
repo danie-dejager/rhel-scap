@@ -21,6 +21,8 @@ description: |-
 
 selections:
     - anssi:all:high
+    - var_password_hashing_algorithm=SHA512
+    - var_password_pam_unix_rounds=65536
     # the following rule renders UEFI systems unbootable
     - '!sebool_secure_mode_insmod'
     # Following rules once had a prodtype incompatible with the rhel9 product
@@ -39,7 +41,6 @@ selections:
     - '!enable_pam_namespace'
     - '!audit_rules_privileged_commands_insmod'
     - '!service_chronyd_or_ntpd_enabled'
-    - '!sudo_dedicated_group'
     - '!chronyd_configure_pool_and_server'
     - '!accounts_passwords_pam_tally2'
     - '!cracklib_accounts_password_pam_ucredit'
@@ -49,3 +50,10 @@ selections:
     - '!cracklib_accounts_password_pam_minlen'
     - '!cracklib_accounts_password_pam_dcredit'
     - '!ensure_oracle_gpgkey_installed'
+    - '!package_kea_removed'
+    # disable R45: Enable AppArmor security profiles
+    - '!apparmor_configured'
+    - '!all_apparmor_profiles_enforced'
+    - '!grub2_enable_apparmor'
+    - '!package_apparmor_installed'
+    - '!package_pam_apparmor_installed'

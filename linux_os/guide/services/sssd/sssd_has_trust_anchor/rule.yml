@@ -30,14 +30,14 @@ rationale: |-
 identifiers:
   cce@rhel8: CCE-86312-6
   cce@rhel9: CCE-86321-7
+  cce@rhel10: CCE-87826-4
 
 references:
-  disa: CCI-000185
+  disa: CCI-004068,CCI-000185
   nist: IA-5 (2) (a)
   srg: SRG-OS-000066-GPOS-00034,SRG-OS-000384-GPOS-00167
   stigid@ol8: OL08-00-010090
   stigid@rhel8: RHEL-08-010090
-  stigid@rhel9: RHEL-09-631010
 
 warnings:
     - general: |-

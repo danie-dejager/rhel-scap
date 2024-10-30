@@ -21,6 +21,8 @@ description: |-
 
 selections:
   - anssi:all:intermediary
+  - var_password_hashing_algorithm=SHA512
+  - var_password_pam_unix_rounds=65536
   # Following rules once had a prodtype incompatible with the rhel9 product
   - '!partition_for_opt'
   - '!cracklib_accounts_password_pam_minlen'
@@ -38,3 +40,4 @@ selections:
   - '!sudo_add_ignore_dot'
   - '!sudo_add_env_reset'
   - '!ensure_oracle_gpgkey_installed'
+  - '!package_kea_removed'

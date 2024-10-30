@@ -12,9 +12,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-83472-1
     cce@rhel8: CCE-83473-9
     cce@rhel9: CCE-83944-9
+    cce@rhel10: CCE-89017-8
     cce@sle12: CCE-91700-5
     cce@sle15: CCE-91330-1
 
@@ -23,12 +23,10 @@ references:
     cis@sle15: 6.1.7
     cis@ubuntu2004: 6.1.8
     cis@ubuntu2204: 6.1.4
-    disa: CCI-002223
+    disa: CCI-000366
     nist: AC-6 (1)
     pcidss: Req-8.7.c
-    pcidss4: '2.2.6'
     srg: SRG-OS-000480-GPOS-00227
-    stigid@rhel9: RHEL-09-232100
 
 ocil_clause: '{{{ ocil_clause_file_owner(file="/etc/group-", owner="root") }}}'
 

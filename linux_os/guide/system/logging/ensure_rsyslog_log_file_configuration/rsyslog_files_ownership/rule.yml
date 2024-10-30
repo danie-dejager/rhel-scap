@@ -43,9 +43,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-80189-4
     cce@rhel8: CCE-80861-8
     cce@rhel9: CCE-83946-4
+    cce@rhel10: CCE-88780-2
     cce@sle12: CCE-91509-0
     cce@sle15: CCE-85839-9
 
@@ -63,7 +63,6 @@ references:
     nist: CM-6(a),AC-6(1)
     nist-csf: PR.AC-4,PR.DS-5
     pcidss: Req-10.5.1,Req-10.5.2
-    pcidss4: '10.3.2'
 
 ocil_clause: 'the owner is not correct'
 

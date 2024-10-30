@@ -19,7 +19,6 @@ rationale: |-
 severity: low
 
 identifiers:
-    cce@rhel7: CCE-80269-4
     cce@rhel8: CCE-82405-2
     cce@rhel9: CCE-84235-1
 
@@ -39,7 +38,7 @@ ocil_clause: |-
 ocil: |-
     {{{ ocil_service_disabled(service="rhnsd") }}}
 
-platform: machine
+platform: system_with_kernel
 
 template:
     name: service_disabled

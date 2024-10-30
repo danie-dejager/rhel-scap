@@ -14,9 +14,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-86944-6
     cce@rhel8: CCE-86945-3
     cce@rhel9: CCE-86946-1
+    cce@rhel10: CCE-89507-8
     cce@sle12: CCE-91683-3
     cce@sle15: CCE-91313-7
 
@@ -24,7 +24,6 @@ references:
     cis@sle12: 5.1.9
     cis@sle15: 5.1.9
     cis@ubuntu2204: 5.1.9
-    pcidss4: "2.2.6"
 
 ocil_clause: 'the file /etc/at.deny exists'
 

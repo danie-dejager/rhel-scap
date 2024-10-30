@@ -19,18 +19,17 @@ rationale: |-
 
 severity: low
 
-platform: machine
+platform: system_with_kernel
 
 identifiers:
     cce@rhcos4: CCE-82718-8
-    cce@rhel7: CCE-80143-1
     cce@rhel8: CCE-82729-5
     cce@rhel9: CCE-83852-4
+    cce@rhel10: CCE-87504-7
     cce@sle12: CCE-92299-7
     cce@sle15: CCE-92453-0
 
 references:
-    ccn@rhel9: A.8.SEC-RHEL4
     cis-csc: 11,14,3,9
     cis@sle12: 1.1.1.2
     cis@sle15: 1.1.1.2

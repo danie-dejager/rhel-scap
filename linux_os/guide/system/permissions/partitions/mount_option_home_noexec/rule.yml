@@ -16,9 +16,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-83327-7
     cce@rhel8: CCE-83328-5
     cce@rhel9: CCE-83875-5
+    cce@rhel10: CCE-87810-8
     cce@sle12: CCE-91543-9
     cce@sle15: CCE-91236-0
 
@@ -28,7 +28,6 @@ references:
     srg: SRG-OS-000480-GPOS-00227
     stigid@ol8: OL08-00-010590
     stigid@rhel8: RHEL-08-010590
-    stigid@rhel9: RHEL-09-231055
 
 platform: machine
 

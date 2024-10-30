@@ -19,16 +19,15 @@ rationale: |-
 severity: low
 
 identifiers:
-    cce@rhel7: CCE-80230-6
     cce@rhel8: CCE-82858-2
     cce@rhel9: CCE-84245-0
+    cce@rhel10: CCE-88459-3
     cce@sle12: CCE-91682-5
     cce@sle15: CCE-91312-9
 
 references:
     cis@sle12: 2.2.8
     cis@sle15: 2.2.8
-    pcidss4: "2.2.4"
 
 template:
     name: service_disabled

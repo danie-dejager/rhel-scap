@@ -17,9 +17,6 @@ rationale: |-
 
 severity: medium
 
-identifiers:
-  cce@rhel7: CCE-90778-2
-
 references:
     cis-csc: 12,15,8
     cjis: 5.10.1.2
@@ -58,5 +55,3 @@ warnings:
         party review by an accredited lab. While open source software is
         capable of meeting this, it does not meet FIPS-140 unless the vendor
         submits to this process.
-
-platform: machine

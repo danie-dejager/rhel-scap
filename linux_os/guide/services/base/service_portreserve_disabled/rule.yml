@@ -17,7 +17,6 @@ rationale: |-
 severity: low
 
 identifiers:
-    cce@rhel7: CCE-80264-5
     cce@rhel8: CCE-82390-6
 
 references:
@@ -35,7 +34,7 @@ ocil_clause: |-
 ocil: |-
     {{{ ocil_service_disabled(service="portreserve") }}}
 
-platform: machine
+platform: system_with_kernel
 
 template:
     name: service_disabled

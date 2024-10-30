@@ -15,9 +15,9 @@ severity: low
 
 identifiers:
     cce@rhcos4: CCE-82737-8
-    cce@rhel7: CCE-82034-0
     cce@rhel8: CCE-80853-5
     cce@rhel9: CCE-90848-3
+    cce@rhel10: CCE-88355-3
     cce@sle12: CCE-91489-5
     cce@sle15: CCE-91181-8
 
@@ -39,7 +39,6 @@ references:
     srg: SRG-OS-000480-GPOS-00227
     stigid@ol8: OL08-00-010541
     stigid@rhel8: RHEL-08-010541
-    stigid@rhel9: RHEL-09-231025
 
 {{{ complete_ocil_entry_separate_partition(part="/var/log") }}}
 
@@ -57,5 +56,5 @@ template:
     name: mount
     vars:
         mountpoint: /var/log
-        min_size: 5368709120
+        min_size: 1073741824
 {{% endif %}}

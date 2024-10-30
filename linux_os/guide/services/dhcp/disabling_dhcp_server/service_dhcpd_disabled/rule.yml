@@ -16,7 +16,6 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-80330-4
     cce@rhel8: CCE-82864-0
     cce@rhel9: CCE-84241-9
     cce@sle12: CCE-92243-5
@@ -40,7 +39,7 @@ ocil_clause: |-
 ocil: |-
     {{{ ocil_service_disabled(service="dhcpd") }}}
 
-platform: machine
+platform: system_with_kernel
 
 template:
     name: service_disabled

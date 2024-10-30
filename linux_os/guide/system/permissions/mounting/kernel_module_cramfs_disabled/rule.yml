@@ -18,13 +18,13 @@ rationale: |-
 
 severity: low
 
-platform: machine
+platform: system_with_kernel
 
 identifiers:
     cce@rhcos4: CCE-82514-1
-    cce@rhel7: CCE-80137-3
     cce@rhel8: CCE-81031-7
     cce@rhel9: CCE-83853-2
+    cce@rhel10: CCE-90005-0
     cce@sle12: CCE-92297-1
     cce@sle15: CCE-92451-4
 
@@ -46,7 +46,6 @@ references:
     srg: SRG-OS-000095-GPOS-00049
     stigid@ol8: OL08-00-040025
     stigid@rhel8: RHEL-08-040025
-    stigid@rhel9: RHEL-09-231195
 
 {{{ complete_ocil_entry_module_disable(module="cramfs") }}}
 

@@ -14,7 +14,7 @@ rationale: |-
     process audit logs as required. Without this notification, the security personnel may be
     unaware of an impending failure of the audit capability, and system operation may be adversely
     affected.
-    
+
     Audit processing failures include software/hardware errors, failures in the audit capturing
     mechanisms, and audit storage capacity being reached or exceeded.
 
@@ -23,6 +23,7 @@ severity: medium
 identifiers:
     cce@rhel8: CCE-89063-2
     cce@rhel9: CCE-89064-0
+    cce@rhel10: CCE-89448-5
 
 references:
     disa: CCI-000139
@@ -30,7 +31,6 @@ references:
     srg: SRG-OS-000046-GPOS-00022
     stigid@ol8: OL08-00-030030
     stigid@rhel8: RHEL-08-030030
-    stigid@rhel9: RHEL-09-252060
 
 ocil_clause: 'the alias is not set or is not root'
 

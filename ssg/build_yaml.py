@@ -49,6 +49,14 @@ from .entities.common import add_sub_element, make_items_product_specific, \
 from .entities.profile import Profile, ProfileWithInlinePolicies
 
 
+def _get_cpe_platforms_of_sub_groups(group, rule_ids_list):
+    cpe_platforms = set()
+    for sub_group in group.groups.values():
+        cpe_platforms_of_sub_group = sub_group.get_used_cpe_platforms(rule_ids_list)
+        cpe_platforms.update(cpe_platforms_of_sub_group)
+    return cpe_platforms
+
+
 def reorder_according_to_ordering(unordered, ordering, regex=None):
     ordered = []
     if regex is None:
@@ -107,6 +115,10 @@ def add_reference_elements(element, references, ref_uri_dict):
             if ref_type == 'srg':
                 if ref_val.startswith('SRG-OS-'):
                     ref_href = ref_uri_dict['os-srg']
+                elif re.match(r'SRG-APP-\d{5,}-CTR-\d{5,}', ref_val):
+                    # The more specific case needs to come first, otherwise the generic SRG-APP
+                    # will catch everything
+                    ref_href = ref_uri_dict['app-srg-ctr']
                 elif ref_val.startswith('SRG-APP-'):
                     ref_href = ref_uri_dict['app-srg']
                 else:
@@ -351,13 +363,55 @@ class Benchmark(XCCDFEntity):
         for g in self.groups.values():
             g.remove_rules_with_ids_not_listed(selected_rules)
 
-    def get_rules_selected_in_all_profiles(self):
+    def get_components_not_included_in_a_profiles(self, profiles,  rules_and_variables_dict):
+        selected_rules = self.get_rules_selected_in_all_profiles(profiles)
+        selected_variables = self.get_variables_of_rules(
+            profiles, selected_rules, rules_and_variables_dict
+        )
+        rules = set()
+        groups = set()
+        variables = set()
+
+        out_sets = dict(rules_set=rules, groups_set=groups, variables_set=variables)
+
+        for sub_group in self.groups.values():
+            self._update_not_included_components(
+                sub_group, selected_rules, selected_variables, out_sets
+            )
+
+        return rules, groups, variables
+
+    def get_used_cpe_platforms(self, profiles):
+        selected_rules = self.get_rules_selected_in_all_profiles(profiles)
+        cpe_platforms = _get_cpe_platforms_of_sub_groups(self, selected_rules)
+        return cpe_platforms
+
+    def get_not_used_cpe_platforms(self, profiles):
+        used_cpe_platforms = self.get_used_cpe_platforms(profiles)
+        out = set()
+        for cpe_platform in self.product_cpes.platforms.keys():
+            if cpe_platform not in used_cpe_platforms:
+                out.add(cpe_platform)
+        return out
+
+    @staticmethod
+    def get_variables_of_rules(profiles, rule_ids, rules_and_variables_dict):
+        selected_variables = set()
+        for rule in rule_ids:
+            selected_variables.update(rules_and_variables_dict.get(rule))
+        for profile in profiles:
+            selected_variables.update(profile.variables.keys())
+        return selected_variables
+
+    def get_rules_selected_in_all_profiles(self, profiles=None):
         selected_rules = set()
-        for p in self.profiles:
+        if profiles is None:
+            profiles = self.profiles
+        for p in profiles:
             selected_rules.update(p.selected)
         return selected_rules
 
-    def to_xml_element(self, env_yaml=None, product_cpes=None):
+    def _create_benchmark_xml_skeleton(self, env_yaml):
         root = ET.Element('{%s}Benchmark' % XCCDF12_NS)
         root.set('id', OSCAP_BENCHMARK + self.id_)
         root.set('xmlns:xsi', 'http://www.w3.org/2001/XMLSchema-instance')
@@ -367,23 +421,35 @@ class Benchmark(XCCDFEntity):
         root.set('style', 'SCAP_1.2')
         root.set('resolved', 'true')
         root.set('xml:lang', 'en-US')
+
         status = ET.SubElement(root, '{%s}status' % XCCDF12_NS)
         status.set('date', datetime.date.today().strftime("%Y-%m-%d"))
         status.text = self.status
+
         add_sub_element(root, "title", XCCDF12_NS, self.title)
         add_sub_element(root, "description", XCCDF12_NS, self.description)
+
         notice = add_sub_element(
-            root, "notice", XCCDF12_NS, self.notice_description)
+            root, "notice", XCCDF12_NS, self.notice_description
+        )
         notice.set('id', self.notice_id)
+
         add_sub_element(root, "front-matter", XCCDF12_NS, self.front_matter)
         add_sub_element(root, "rear-matter",  XCCDF12_NS, self.rear_matter)
-        add_reference_title_elements(root, env_yaml)
+
+        return root
+
+    def _add_cpe_xml(self, root, cpe_platforms_to_not_include, product_cpes=None):
         # if there are no platforms, do not output platform-specification at all
-        if len(self.product_cpes.platforms) > 0:
-            cpe_platform_spec = ET.Element(
-                "{%s}platform-specification" % PREFIX_TO_NS["cpe-lang"])
-            for platform in self.product_cpes.platforms.values():
-                cpe_platform_spec.append(platform.to_xml_element())
+
+        cpe_platform_spec = ET.Element(
+            "{%s}platform-specification" % PREFIX_TO_NS["cpe-lang"])
+        for platform_id, platform in self.product_cpes.platforms.items():
+            if platform_id in cpe_platforms_to_not_include:
+                continue
+            cpe_platform_spec.append(platform.to_xml_element())
+
+        if len(cpe_platform_spec) > 0:
             root.append(cpe_platform_spec)
 
         # The Benchmark applicability is determined by the CPEs
@@ -392,41 +458,78 @@ class Benchmark(XCCDFEntity):
             plat = ET.SubElement(root, "{%s}platform" % XCCDF12_NS)
             plat.set("idref", cpe_name)
 
+    def _add_profiles_xml(self, root, components_to_not_include):
+        profiles_to_not_include = components_to_not_include.get("profiles", set())
+        for profile in self.profiles:
+            if profile.id_ in profiles_to_not_include:
+                continue
+            profile.remove_components_not_included(components_to_not_include)
+            root.append(profile.to_xml_element())
+
+    def _add_values_xml(self, root, components_to_not_include):
+        variables_to_not_include = components_to_not_include.get("variables", set())
+        for value_id, value in self.values.items():
+            if value_id in variables_to_not_include:
+                continue
+            root.append(value.to_xml_element())
+
+    def _add_groups_xml(self, root, components_to_not_include, env_yaml=None):
+        groups_in_bench = list(self.groups.keys())
+        priority_order = ["system", "services", "auditing"]
+        groups_in_bench = reorder_according_to_ordering(groups_in_bench, priority_order)
+
+        groups_to_not_include = components_to_not_include.get("groups", set())
+        # Make system group the first, followed by services group
+        for group_id in groups_in_bench:
+            if group_id in groups_to_not_include:
+                continue
+            group = self.groups.get(group_id)
+            # Products using application benchmark don't have system or services group
+            if group is not None:
+                root.append(group.to_xml_element(env_yaml, components_to_not_include))
+
+    def _add_rules_xml(self, root, rules_to_not_include, env_yaml=None):
+        for rule in self.rules.values():
+            if rule.id_ in rules_to_not_include:
+                continue
+            root.append(rule.to_xml_element(env_yaml))
+
+    def _add_version_xml(self, root):
         version = ET.SubElement(root, '{%s}version' % XCCDF12_NS)
         version.text = self.version
         version.set('update', SSG_BENCHMARK_LATEST_URI)
 
+    def to_xml_element(self, env_yaml=None, product_cpes=None, components_to_not_include=None):
+        if components_to_not_include is None:
+            cpe_platforms = self.get_not_used_cpe_platforms(self.profiles)
+            components_to_not_include = {"cpe_platforms": cpe_platforms}
+
+        root = self._create_benchmark_xml_skeleton(env_yaml)
+
+        add_reference_title_elements(root, env_yaml)
+
+        self._add_cpe_xml(
+            root, components_to_not_include.get("cpe_platforms", set()), product_cpes
+        )
+
+        self._add_version_xml(root)
+
         contributors_file = os.path.join(os.path.dirname(__file__), "../Contributors.xml")
         add_benchmark_metadata(root, contributors_file)
 
-        for profile in self.profiles:
-            root.append(profile.to_xml_element())
-
-        for value in self.values.values():
-            root.append(value.to_xml_element())
-
-        groups_in_bench = list(self.groups.keys())
-        priority_order = ["system", "services"]
-        groups_in_bench = reorder_according_to_ordering(groups_in_bench, priority_order)
-
-        # Make system group the first, followed by services group
-        for group_id in groups_in_bench:
-            group = self.groups.get(group_id)
-            # Products using application benchmark don't have system or services group
-            if group is not None:
-                root.append(group.to_xml_element(env_yaml))
-
-        for rule in self.rules.values():
-            root.append(rule.to_xml_element(env_yaml))
+        self._add_profiles_xml(root, components_to_not_include)
+        self._add_values_xml(root, components_to_not_include)
+        self._add_groups_xml(root, components_to_not_include, env_yaml)
+        self._add_rules_xml(root, components_to_not_include.get("rules", set()),  env_yaml,)
 
         if hasattr(ET, "indent"):
-            ET.indent(root, space=" ", level=0)
+            ET.indent(root, space="  ", level=0)
         return root
 
     def to_file(self, file_name, env_yaml=None):
         root = self.to_xml_element(env_yaml)
         tree = ET.ElementTree(root)
-        tree.write(file_name)
+        tree.write(file_name, encoding="utf-8")
 
     def add_value(self, value):
         if value is None:
@@ -453,6 +556,28 @@ class Benchmark(XCCDFEntity):
 
     def __str__(self):
         return self.id_
+
+    def get_benchmark_xml_for_profiles(self, env_yaml, profiles, rule_and_variables_dict):
+        rules, groups, variables = self.get_components_not_included_in_a_profiles(
+            profiles, rule_and_variables_dict
+        )
+        cpe_platforms = self.get_not_used_cpe_platforms(profiles)
+        profiles_ids = [profile.id_ for profile in profiles]
+        profiles = set(filter(
+            lambda id_, profiles_ids=profiles_ids: id_ not in profiles_ids,
+            [profile.id_ for profile in self.profiles]
+        ))
+        components_to_not_include = {
+                "rules": rules,
+                "groups": groups,
+                "variables": variables,
+                "profiles": profiles,
+                "cpe_platforms": cpe_platforms
+            }
+        return profiles_ids, self.to_xml_element(
+            env_yaml,
+            components_to_not_include=components_to_not_include
+        )
 
 
 class Group(XCCDFEntity):
@@ -542,31 +667,21 @@ class Group(XCCDFEntity):
 
         return yaml_contents
 
-    def to_xml_element(self, env_yaml=None):
+    def _create_group_xml_skeleton(self):
         group = ET.Element('{%s}Group' % XCCDF12_NS)
         group.set('id', OSCAP_GROUP + self.id_)
         title = ET.SubElement(group, '{%s}title' % XCCDF12_NS)
         title.text = self.title
         add_sub_element(group, 'description', XCCDF12_NS, self.description)
         add_warning_elements(group, self.warnings)
+        return group
 
-        # This is where references should be put if there are any
-        # This is where rationale should be put if there are any
-
+    def _add_cpe_platforms_xml(self, group):
         for cpe_platform_name in self.cpe_platform_names:
             platform_el = ET.SubElement(group, "{%s}platform" % XCCDF12_NS)
             platform_el.set("idref", "#"+cpe_platform_name)
 
-        add_nondata_subelements(
-            group, "requires", "idref",
-            list(map(lambda x: OSCAP_GROUP + x, self.requires)))
-        add_nondata_subelements(
-            group, "conflicts", "idref",
-            list(map(lambda x: OSCAP_GROUP + x, self.conflicts)))
-        for _value in self.values.values():
-            if _value is not None:
-                group.append(_value.to_xml_element())
-
+    def _add_rules_xml(self, group, rules_to_not_include, env_yaml):
         # Rules that install or remove packages affect remediation
         # of other rules.
         # When packages installed/removed rules come first:
@@ -577,18 +692,27 @@ class Group(XCCDFEntity):
                  r'(service_.*_(enabled|disabled))|' +
                  r'install_smartcard_packages|' +
                  r'sshd_set_keepalive(_0)?|' +
-                 r'sshd_set_idle_timeout$')
+                 r'sshd_set_idle_timeout|' +
+                 r'chronyd_specify_remote_server|' +
+                 r'zipl_.*_argument(_absent)?$')
         priority_order = ["enable_authselect", "installed", "install_smartcard_packages", "removed",
                           "enabled", "disabled", "sshd_set_keepalive_0",
-                          "sshd_set_keepalive", "sshd_set_idle_timeout"]
+                          "sshd_set_keepalive", "sshd_set_idle_timeout",
+                          "chronyd_specify_remote_server",
+                          "argument"]
         rules_in_group = reorder_according_to_ordering(rules_in_group, priority_order, regex)
 
         # Add rules in priority order, first all packages installed, then removed,
         # followed by services enabled, then disabled
         for rule_id in rules_in_group:
+            if rule_id in rules_to_not_include:
+                continue
             rule = self.rules.get(rule_id)
             if rule is not None:
                 group.append(rule.to_xml_element(env_yaml))
+
+    def _add_sub_groups(self, group, components_to_not_include, env_yaml):
+        groups_to_not_include = components_to_not_include.get("groups", set())
 
         # Add the sub groups after any current level group rules.
         # As package installed/removed and service enabled/disabled rules are usuallly in
@@ -626,9 +750,42 @@ class Group(XCCDFEntity):
         ]
         groups_in_group = reorder_according_to_ordering(groups_in_group, priority_order)
         for group_id in groups_in_group:
+            if group_id in groups_to_not_include:
+                continue
             _group = self.groups[group_id]
             if _group is not None:
-                group.append(_group.to_xml_element(env_yaml))
+                group.append(_group.to_xml_element(env_yaml, components_to_not_include))
+
+    def to_xml_element(self, env_yaml=None,  components_to_not_include=None):
+        if components_to_not_include is None:
+            components_to_not_include = {}
+
+        rules_to_not_include = components_to_not_include.get("rules", set())
+        groups_to_not_include = components_to_not_include.get("groups", set())
+
+        if self.id_ in groups_to_not_include:
+            return None
+
+        group = self._create_group_xml_skeleton()
+
+        self._add_cpe_platforms_xml(group)
+
+        add_nondata_subelements(
+            group, "requires", "idref",
+            list(map(lambda x: OSCAP_GROUP + x, self.requires)))
+        add_nondata_subelements(
+            group, "conflicts", "idref",
+            list(map(lambda x: OSCAP_GROUP + x, self.conflicts)))
+
+        variables_to_not_include = components_to_not_include.get("variables", set())
+        for value_id, _value in self.values.items():
+            if value_id in variables_to_not_include:
+                continue
+            if _value is not None:
+                group.append(_value.to_xml_element())
+
+        self._add_rules_xml(group, rules_to_not_include, env_yaml)
+        self._add_sub_groups(group, components_to_not_include, env_yaml)
 
         return group
 
@@ -659,6 +816,56 @@ class Group(XCCDFEntity):
         for group in self.groups.values():
             group.remove_rules_with_ids_not_listed(rule_ids_list)
 
+    def contains_rules(self, rule_ids):
+        return self._contains_required_element("rule", rule_ids, self.rules.keys())
+
+    def contains_variables(self, variable_ids):
+        return self._contains_required_element("variable", variable_ids, self.values.keys())
+
+    def _contains_required_element(self, element_type, ids, existing_ids):
+        intersection_of_ids = list(set(ids) & set(existing_ids))
+        if len(intersection_of_ids) > 0:
+            return True
+        results = []
+        for g in self.groups.values():
+            if element_type == "variable":
+                results.append(g.contains_variables(ids))
+            if element_type == "rule":
+                results.append(g.contains_rules(ids))
+        return any(results)
+
+    def get_not_included_components(self, rule_ids_list, variables_ids_list):
+        rules = set(filter(lambda id_, ids=rule_ids_list: id_ not in ids, self.rules.keys()))
+        variables = set(
+            filter(lambda id_, ids=variables_ids_list: id_ not in ids, self.values.keys())
+        )
+        groups = set()
+
+        contains_variables = self.contains_variables(variables_ids_list)
+        contains_rules = self.contains_rules(rule_ids_list)
+        if not contains_rules and not contains_variables:
+            groups.add(self.id_)
+
+        out_sets = dict(rules_set=rules, groups_set=groups, variables_set=variables)
+
+        for sub_group in self.groups.values():
+            self._update_not_included_components(
+                sub_group, rule_ids_list, variables_ids_list, out_sets
+            )
+        return rules, groups, variables
+
+    def get_used_cpe_platforms(self, rule_ids_list):
+        cpe_platforms = set()
+        for rule_id in rule_ids_list:
+            if rule_id not in self.rules:
+                continue
+            rule = self.rules[rule_id]
+            cpe_platforms.update(rule.cpe_platform_names)
+            cpe_platforms.update(rule.inherited_cpe_platform_names)
+
+        cpe_platforms.update(_get_cpe_platforms_of_sub_groups(self, rule_ids_list))
+        return cpe_platforms
+
     def __str__(self):
         return self.id_
 
@@ -686,6 +893,7 @@ class Rule(XCCDFEntity, Templatable):
         rationale=lambda: "",
         severity=lambda: "",
         references=lambda: dict(),
+        control_references=lambda: dict(),
         components=lambda: list(),
         identifiers=lambda: dict(),
         ocil_clause=lambda: None,
@@ -1005,13 +1213,122 @@ class Rule(XCCDFEntity, Templatable):
             ident.set("system", SSG_IDENT_URIS[ident_type])
             ident.text = ident_val
 
-    def add_extra_reference(self, ref_type, ref_value):
-        if ref_type == "anssi":
-            ref_value = "BP28(%s)" % ref_value
-        if ref_type in self.references:
-            self.references[ref_type].append(ref_value)
+    def add_control_reference(self, ref_type, ref_value):
+        if ref_type in self.control_references:
+            if ref_value in self.control_references[ref_type]:
+                msg = (
+                    "Rule %s already contains a '%s' reference with value '%s'." % (
+                        self.id_, ref_type, ref_value))
+                raise ValueError(msg)
+            self.control_references[ref_type].append(ref_value)
         else:
-            self.references[ref_type] = [ref_value]
+            self.control_references[ref_type] = [ref_value]
+
+    def merge_control_references(self):
+        for ref_type in self.control_references:
+            if ref_type in self.references:
+                self.references[ref_type].append(self.control_references[ref_type])
+            else:
+                self.references[ref_type] = self.control_references[ref_type]
+
+    def _get_sce_check_parent_element(self, rule_el):
+        if 'complex-check' in self.sce_metadata:
+            # Here we have an issue: XCCDF allows EITHER one or more check
+            # elements OR a single complex-check. While we have an explicit
+            # case handling the OVAL-and-SCE interaction, OCIL entries have
+            # (historically) been alongside OVAL content and been in an
+            # "OR" manner -- preferring OVAL to SCE. In order to accomplish
+            # this, we thus need to add _yet another parent_ when OCIL data
+            # is present, and add update ocil_parent accordingly.
+            if self.ocil or self.ocil_clause:
+                ocil_parent = ET.SubElement(
+                    rule_el, "{%s}complex-check" % XCCDF12_NS)
+                ocil_parent.set('operator', 'OR')
+
+            check_parent = ET.SubElement(
+                ocil_parent, "{%s}complex-check" % XCCDF12_NS)
+            check_parent.set('operator', self.sce_metadata['complex-check'])
+        else:
+            check_parent = rule_el
+        return check_parent
+
+    def _add_sce_check_import_element(self, sce_check):
+        if isinstance(self.sce_metadata['check-import'], str):
+            self.sce_metadata['check-import'] = [self.sce_metadata['check-import']]
+        for entry in self.sce_metadata['check-import']:
+            check_import = ET.SubElement(
+                sce_check, '{%s}check-import' % XCCDF12_NS)
+            check_import.set('import-name', entry)
+            check_import.text = None
+
+    def _add_sce_check_export_element(self, sce_check):
+        if isinstance(self.sce_metadata['check-export'], str):
+            self.sce_metadata['check-export'] = [self.sce_metadata['check-export']]
+        for entry in self.sce_metadata['check-export']:
+            export, value = entry.split('=')
+            check_export = ET.SubElement(
+                sce_check, '{%s}check-export' % XCCDF12_NS)
+            check_export.set('value-id', value)
+            check_export.set('export-name', export)
+            check_export.text = None
+
+    def _add_sce_check_content_ref_element(self, sce_check):
+        check_ref = ET.SubElement(
+            sce_check, "{%s}check-content-ref" % XCCDF12_NS)
+        href = self.sce_metadata['relative_path']
+        check_ref.set("href", href)
+
+    def _add_sce_check_element(self, rule_el):
+        if not self.sce_metadata:
+            return
+        # TODO: This is pretty much another hack, just like the previous OVAL
+        # one. However, we avoided the external SCE content as I'm not sure it
+        # is generally useful (unlike say, CVE checking with external OVAL)
+        #
+        # Additionally, we build the content (check subelement) here rather
+        # than in xslt due to the nature of our SCE metadata.
+        #
+        # Finally, before we begin, we might have an element with both SCE
+        # and OVAL. We have no way of knowing (right here) whether that is
+        # the case (due to a variety of issues, most notably, that linking
+        # hasn't yet occurred). So we must rely on the content author's
+        # good will, by annotating SCE content with a complex-check tag
+        # if necessary.
+        parent_el = self._get_sce_check_parent_element(rule_el)
+        sce_check_el = ET.SubElement(parent_el, "{%s}check" % XCCDF12_NS)
+        sce_check_el.set("system", SCE_SYSTEM)
+        if 'check-import' in self.sce_metadata:
+            self._add_sce_check_import_element(sce_check_el)
+        if 'check-export' in self.sce_metadata:
+            self._add_sce_check_export_element(sce_check_el)
+        self._add_sce_check_content_ref_element(sce_check_el)
+
+    def _add_oval_check_element(self, rule_el):
+        check = ET.SubElement(rule_el, '{%s}check' % XCCDF12_NS)
+        check.set("system", oval_namespace)
+        check_content_ref = ET.SubElement(
+            check, "{%s}check-content-ref" % XCCDF12_NS)
+        if self.oval_external_content:
+            check_content_ref.set("href", self.oval_external_content)
+        else:
+            # TODO: This is pretty much a hack, oval ID will be the same as rule ID
+            #       and we don't want the developers to have to keep them in sync.
+            #       Therefore let's just add an OVAL ref of that ID.
+            # TODO  Can we not add the check element if the rule doesn't have an OVAL check?
+            #       At the moment, the check elements of rules without OVAL are removed by
+            #       the OVALFileLinker class.
+            check_content_ref.set("href", "oval-unlinked.xml")
+            check_content_ref.set("name", self.id_)
+
+    def _add_ocil_check_element(self, rule_el):
+        patches_up_to_date = (self.id_ == "security_patches_up_to_date")
+        if (self.ocil or self.ocil_clause) and not patches_up_to_date:
+            ocil_check = ET.SubElement(rule_el, "{%s}check" % XCCDF12_NS)
+            ocil_check.set("system", ocil_cs)
+            ocil_check_ref = ET.SubElement(
+                ocil_check, "{%s}check-content-ref" % XCCDF12_NS)
+            ocil_check_ref.set("href", "ocil-unlinked.xml")
+            ocil_check_ref.set("name", self.id_ + "_ocil")
 
     def to_xml_element(self, env_yaml=None):
         rule = ET.Element('{%s}Rule' % XCCDF12_NS)
@@ -1044,94 +1361,9 @@ class Rule(XCCDFEntity, Templatable):
         self._add_ident_elements(rule)
         self._add_fixes_elements(rule)
 
-        ocil_parent = rule
-        check_parent = rule
-
-        if self.sce_metadata:
-            # TODO: This is pretty much another hack, just like the previous OVAL
-            # one. However, we avoided the external SCE content as I'm not sure it
-            # is generally useful (unlike say, CVE checking with external OVAL)
-            #
-            # Additionally, we build the content (check subelement) here rather
-            # than in xslt due to the nature of our SCE metadata.
-            #
-            # Finally, before we begin, we might have an element with both SCE
-            # and OVAL. We have no way of knowing (right here) whether that is
-            # the case (due to a variety of issues, most notably, that linking
-            # hasn't yet occurred). So we must rely on the content author's
-            # good will, by annotating SCE content with a complex-check tag
-            # if necessary.
-
-            if 'complex-check' in self.sce_metadata:
-                # Here we have an issue: XCCDF allows EITHER one or more check
-                # elements OR a single complex-check. While we have an explicit
-                # case handling the OVAL-and-SCE interaction, OCIL entries have
-                # (historically) been alongside OVAL content and been in an
-                # "OR" manner -- preferring OVAL to SCE. In order to accomplish
-                # this, we thus need to add _yet another parent_ when OCIL data
-                # is present, and add update ocil_parent accordingly.
-                if self.ocil or self.ocil_clause:
-                    ocil_parent = ET.SubElement(
-                        ocil_parent, "{%s}complex-check" % XCCDF12_NS)
-                    ocil_parent.set('operator', 'OR')
-
-                check_parent = ET.SubElement(
-                    ocil_parent, "{%s}complex-check" % XCCDF12_NS)
-                check_parent.set('operator', self.sce_metadata['complex-check'])
-
-            # Now, add the SCE check element to the tree.
-            check = ET.SubElement(check_parent, "{%s}check" % XCCDF12_NS)
-            check.set("system", SCE_SYSTEM)
-
-            if 'check-import' in self.sce_metadata:
-                if isinstance(self.sce_metadata['check-import'], str):
-                    self.sce_metadata['check-import'] = [self.sce_metadata['check-import']]
-                for entry in self.sce_metadata['check-import']:
-                    check_import = ET.SubElement(
-                        check, '{%s}check-import' % XCCDF12_NS)
-                    check_import.set('import-name', entry)
-                    check_import.text = None
-
-            if 'check-export' in self.sce_metadata:
-                if isinstance(self.sce_metadata['check-export'], str):
-                    self.sce_metadata['check-export'] = [self.sce_metadata['check-export']]
-                for entry in self.sce_metadata['check-export']:
-                    export, value = entry.split('=')
-                    check_export = ET.SubElement(
-                        check, '{%s}check-export' % XCCDF12_NS)
-                    check_export.set('value-id', value)
-                    check_export.set('export-name', export)
-                    check_export.text = None
-
-            check_ref = ET.SubElement(
-                check, "{%s}check-content-ref" % XCCDF12_NS)
-            href = self.sce_metadata['relative_path']
-            check_ref.set("href", href)
-
-        check = ET.SubElement(check_parent, '{%s}check' % XCCDF12_NS)
-        check.set("system", oval_namespace)
-        check_content_ref = ET.SubElement(
-            check, "{%s}check-content-ref" % XCCDF12_NS)
-        if self.oval_external_content:
-            check_content_ref.set("href", self.oval_external_content)
-        else:
-            # TODO: This is pretty much a hack, oval ID will be the same as rule ID
-            #       and we don't want the developers to have to keep them in sync.
-            #       Therefore let's just add an OVAL ref of that ID.
-            # TODO  Can we not add the check element if the rule doesn't have an OVAL check?
-            #       At the moment, the check elements of rules without OVAL are removed by
-            #       the OVALFileLinker class.
-            check_content_ref.set("href", "oval-unlinked.xml")
-            check_content_ref.set("name", self.id_)
-
-        patches_up_to_date = (self.id_ == "security_patches_up_to_date")
-        if (self.ocil or self.ocil_clause) and not patches_up_to_date:
-            ocil_check = ET.SubElement(check_parent, "{%s}check" % XCCDF12_NS)
-            ocil_check.set("system", ocil_cs)
-            ocil_check_ref = ET.SubElement(
-                ocil_check, "{%s}check-content-ref" % XCCDF12_NS)
-            ocil_check_ref.set("href", "ocil-unlinked.xml")
-            ocil_check_ref.set("name", self.id_ + "_ocil")
+        self._add_sce_check_element(rule)
+        self._add_oval_check_element(rule)
+        self._add_ocil_check_element(rule)
 
         return rule
 
@@ -1366,15 +1598,12 @@ class DirectoryLoader(object):
 class BuildLoader(DirectoryLoader):
     def __init__(
             self, profiles_dir, env_yaml, product_cpes,
-            sce_metadata_path=None, stig_reference_path=None):
+            sce_metadata_path=None):
         super(BuildLoader, self).__init__(profiles_dir, env_yaml, product_cpes)
 
         self.sce_metadata = None
         if sce_metadata_path and os.path.getsize(sce_metadata_path):
             self.sce_metadata = json.load(open(sce_metadata_path, 'r'))
-        self.stig_references = None
-        if stig_reference_path:
-            self.stig_references = ssg.build_stig.map_versions_to_rule_ids(stig_reference_path)
         self.components_dir = None
         self.rule_to_components = None
 
@@ -1405,8 +1634,6 @@ class BuildLoader(DirectoryLoader):
         self.loaded_group.add_rule(
             rule, env_yaml=self.env_yaml, product_cpes=self.product_cpes)
         rule.normalize(self.env_yaml["product"])
-        if self.stig_references:
-            rule.add_stig_references(self.stig_references)
         if self.rule_to_components is not None:
             rule.components = self.rule_to_components[rule.id_]
         return True
@@ -1427,10 +1654,9 @@ class BuildLoader(DirectoryLoader):
             self.profiles_dir, self.env_yaml, self.product_cpes)
         # Do it this way so we only have to parse the SCE metadata once.
         loader.sce_metadata = self.sce_metadata
-        # Do it this way so we only have to parse the STIG references once.
-        loader.stig_references = self.stig_references
         # Do it this way so we only have to parse the component metadata once.
         loader.rule_to_components = self.rule_to_components
+        loader.components_dir = self.components_dir
         return loader
 
     def export_group_to_file(self, filename):
@@ -1463,6 +1689,7 @@ class LinearLoader(object):
         self.benchmark = None
         self.env_yaml = env_yaml
         self.product_cpes = ProductCPEs()
+        self.off_ocil = False
 
     def find_first_groups_ids(self, start_dir):
         group_files = glob.glob(os.path.join(start_dir, "*", "group.yml"))
@@ -1495,6 +1722,19 @@ class LinearLoader(object):
         self.benchmark.drop_rules_not_included_in_a_profile()
         self.benchmark.unselect_empty_groups()
 
+    def get_benchmark_xml_by_profile(self, rule_and_variables_dict):
+        if self.benchmark is None:
+            raise Exception(
+                "Before generating benchmarks for each profile, you need to load "
+                "the initial benchmark using the load_benchmark method."
+            )
+
+        for profile in self.benchmark.profiles:
+            profiles_ids, benchmark = self.benchmark.get_benchmark_xml_for_profiles(
+                self.env_yaml, [profile], rule_and_variables_dict
+            )
+            yield profiles_ids.pop(), benchmark
+
     def load_compiled_content(self):
         self.product_cpes.load_cpes_from_directory_tree(self.resolved_cpe_items_dir, self.env_yaml)
 
@@ -1516,7 +1756,13 @@ class LinearLoader(object):
         for g in self.groups.values():
             g.load_entities(self.rules, self.values, self.groups)
 
-    def export_benchmark_to_xml(self):
+    def export_benchmark_to_xml(self, rule_and_variables_dict):
+        _, benchmark = self.benchmark.get_benchmark_xml_for_profiles(
+            self.env_yaml, self.benchmark.profiles, rule_and_variables_dict
+        )
+        return benchmark
+
+    def get_benchmark_xml(self):
         return self.benchmark.to_xml_element(self.env_yaml)
 
     def export_benchmark_to_file(self, filename):
@@ -1555,9 +1801,17 @@ class LinearLoader(object):
     def _get_rules_from_benchmark(self, benchmark):
         return [self.rules[rule_id] for rule_id in benchmark.get_rules_selected_in_all_profiles()]
 
-    def export_ocil_to_xml(self):
+    def export_ocil_to_xml(self, benchmark=None):
+        if self.off_ocil:
+            return None
         root = self._create_ocil_xml_skeleton()
-        rules = self._get_rules_from_benchmark(self.benchmark)
+
+        if benchmark is None:
+            benchmark = self.benchmark
+
+        rules = self._get_rules_from_benchmark(benchmark)
+        if len(rules) == 0:
+            return None
         self._add_ocil_rules(rules, root)
 
         if hasattr(ET, "indent"):
@@ -1566,8 +1820,10 @@ class LinearLoader(object):
 
     def export_ocil_to_file(self, filename):
         root = self.export_ocil_to_xml()
+        if root is None:
+            return
         tree = ET.ElementTree(root)
-        tree.write(filename)
+        tree.write(filename, encoding="utf-8", xml_declaration=True)
 
 
 class Platform(XCCDFEntity):

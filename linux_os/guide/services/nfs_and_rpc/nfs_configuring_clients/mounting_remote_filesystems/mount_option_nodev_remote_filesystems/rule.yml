@@ -12,9 +12,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-80239-7
     cce@rhel8: CCE-84052-0
     cce@rhel9: CCE-90838-4
+    cce@rhel10: CCE-88013-8
 
 references:
     cis-csc: 11,13,14,3,8,9
@@ -28,7 +28,6 @@ references:
     srg: SRG-OS-000480-GPOS-00227
     stigid@ol8: OL08-00-010640
     stigid@rhel8: RHEL-08-010640
-    stigid@rhel9: RHEL-09-231065
 
 ocil_clause: 'the setting does not show'
 
@@ -49,3 +48,5 @@ template:
         mount_has_to_exist: 'yes'
         mountoption: nodev
         mountpoint: remote_filesystems
+
+platform: nfs_mount_defined

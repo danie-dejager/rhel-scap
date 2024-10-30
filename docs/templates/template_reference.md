@@ -172,6 +172,17 @@
 
 -   Languages: Ansible, Bash, OVAL
 
+#### audit_rules_watch
+-   Check if there are file system watches configured in audit rules for the given path.
+
+-   Parameters:
+
+    -   **path** - path that should be part of the audit watch rule as a value
+        of `-w` argument, eg. `/etc/group`.
+
+-   Languages: Ansible, Bash, OVAL
+
+
 #### argument_value_in_line
 -   Checks that `argument=value` pair is present in (optionally) the
     line started with line_prefix (and, optionally, ending with
@@ -193,6 +204,20 @@
         argument-value pair should be present, optional.
 
 -   Languages: OVAL
+
+#### cis_banner
+-   Verify that the contents of a login banner in the given `filepath` complies
+    with CIS requirements.
+
+-   Parameters:
+
+    -   **filepath** - Path to the login banner file, eg. `/etc/motd`.
+
+    -   **banner_must_be_set** - If set to `"true"`, the rule will fail if no
+        banner is configured in that file. Otherwise, the rule will pass if
+        the banner isn't configured.
+
+- Languages: Ansible, Bash, OVAL
 
 #### coreos_kernel_option
 -   Checks that `argument=value` pair is present in the kernel arguments.
@@ -398,7 +423,7 @@ they must be of the same length.
     -   **arg_variable** - the variable used as the value for the argument, eg. `'var_slub_debug_options'`
         This parameter is mutually exclusive with **arg_value**.
 
--   Languages: Ansible, Bash, OVAL, Blueprint
+-   Languages: Ansible, Bash, OVAL, Blueprint, Kickstart
 
 #### grub2_bootloader_argument_absent
 -   Ensures that a kernel command line argument is absent in GRUB 2 configuration.
@@ -477,7 +502,7 @@ The only way to remediate is to recompile and reinstall the kernel, so no remedi
 
     -   **min_size** - the minimum recommended partition size, in bytes
 
--   Languages: Anaconda, OVAL, Blueprint
+-   Languages: Anaconda, OVAL, Blueprint, Kickstart
 
 #### mount_option
 -   Checks if a given partition is mounted with a specific option such
@@ -557,7 +582,7 @@ The only way to remediate is to recompile and reinstall the kernel, so no remedi
         state uses operation "greater than or equal" to compare the
         collected package version with the version in the OVAL state.
 
--   Languages: Anaconda, Ansible, Bash, OVAL, Puppet, Blueprint
+-   Languages: Anaconda, Ansible, Bash, OVAL, Puppet, Blueprint, Kickstart, Bootc
 
 #### package_removed
 -   Checks if the given package is not installed.
@@ -566,7 +591,7 @@ The only way to remediate is to recompile and reinstall the kernel, so no remedi
 
     -   **pkgname** - name of the RPM or DEB package, eg. `tmux`
 
--   Languages: Anaconda, Ansible, Bash, OVAL, Puppet
+-   Languages: Anaconda, Ansible, Bash, OVAL, Puppet, Kickstart, Bootc
 
 #### key_value_pair_in_file
 Checks if a given key and value are configured in a file.
@@ -693,7 +718,7 @@ When the remediation is applied duplicate occurrences of `key` are removed.
         If **daemonname** is not specified it means the name of the
         daemon is the same as the name of service.
 
--   Languages: Ansible, Bash, OVAL, Puppet, Ignition, Kubernetes, Blueprint
+-   Languages: Ansible, Bash, OVAL, Puppet, Ignition, Kubernetes, Blueprint, Kickstart, SCE
 
 #### service_enabled
 -   Checks if a system service is enabled. Uses either systemd or SysV
@@ -712,7 +737,7 @@ When the remediation is applied duplicate occurrences of `key` are removed.
         If **daemonname** is not specified it means the name of the
         daemon is the same as the name of service.
 
--   Languages: Ansible, Bash, OVAL, Puppet, Blueprint
+-   Languages: Ansible, Bash, OVAL, Puppet, Blueprint, Kickstart, SCE
 
 #### shell_lineinfile
 -   Checks shell variable assignments in files. Remediations will paste
@@ -770,7 +795,7 @@ When the remediation is applied duplicate occurrences of `key` are removed.
         package name is provided, socketname is used. Currently, the package name
         is used when running Automatus test scenarios.
 
-- languages: Ansible, Bash, OVAL
+- languages: Ansible, Bash, OVAL, SCE
 
 #### sshd_lineinfile
 -   Checks SSH server configuration items in `/etc/ssh/sshd_config` or
@@ -784,6 +809,14 @@ When the remediation is applied duplicate occurrences of `key` are removed.
 
     -   **value** - value of the SSH configuration option specified by
         **parameter**, eg. `"no"`.
+        This cannot be specified together with the **xccdf_variable** parameter.
+
+    - **xccdf_variable** - specifies an XCCDF variable to use as a value for the specified **parameter**.
+        This parameter conflicts with the **value** parameter.
+
+    - **datatype** - specifies the datatype of the **value** or **xccdf_variable**.
+        Possible options are **int** or **string**.
+        The datatype is utilized for creation of correct templated test scenarios.
 
     -   **missing_parameter_pass** - effective only in OVAL checks, if
         set to `"false"` and the parameter is not present in the
@@ -903,6 +936,40 @@ The selected value can be changed in the profile (consult the actual variable fo
 
 -   Languages: Ansible, Bash, OVAL
 
+#### systemd_dropin_configuration
+- checks if a Systemd-style configuration exists either in the main file or in any file within specified dropin directory.
+    The remediation tries to modify already existing configuration.
+    If the correct section is found and the parameter exists, its value is changed to match the desired one.
+    If the section is found but the parameter does not exist, it is added to this section.
+    If none of inspected files contains the desired section a new file called complianceascode_hardening.conf within the dropin directory is created.
+- parameters:
+    - **master_cfg_file** - the main configuration file to check, e.g. /etc/systemd/journald.conf
+
+    - **dropin_dir** - the respective dropin directory, e.g. the /etc/systemd/journald.conf.d directory when keeping to the example mentioned above
+
+    - **section** - the section of the Systemd file
+
+    - **param** - the parameter to be configured
+
+    - **value** - the value of the parameter
+
+    - **no_quotes** - if set to "true", the value will not be enclosed in quotes
+
+    - **missing_parameter_pass** - effective only in OVAL checks, if
+        set to `"false"` and the parameter is not present in the
+        configuration file, the OVAL check will return false (default value: `"false"`).
+
+-   Languages: Ansible, Bash, OVAL
+
+#### systemd_mount_enabled
+-   Checks if a `systemd` mount unit is enabled
+
+-   Parameters:
+    - **mountname** - name of the systemd mount unit, without the `.mount` suffix, eg. `tmp`
+
+-   Languages: Anaconda, Ansible, Bash, OVAL
+
+
 #### timer_enabled
 -   Checks if a SystemD timer unit is enabled.
 
@@ -916,7 +983,7 @@ The selected value can be changed in the profile (consult the actual variable fo
         provided it is assumed that the name of the RPM package is the
         same as the name of the SystemD timer unit.
 
--   Languages: Ansible, Bash, OVAL
+-   Languages: Ansible, Bash, OVAL, SCE
 
 #### yamlfile_value
 -   Check if value(s) of certain type is (are) present in a YAML (or

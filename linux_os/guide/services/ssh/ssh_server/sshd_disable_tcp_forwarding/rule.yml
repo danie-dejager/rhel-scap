@@ -14,9 +14,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-85854-8
     cce@rhel8: CCE-83301-2
     cce@rhel9: CCE-90806-1
+    cce@rhel10: CCE-89027-7
     cce@sle12: CCE-92204-7
     cce@sle15: CCE-91334-3
 
@@ -25,7 +25,6 @@ references:
     cis@sle15: 5.2.20
     cis@ubuntu2004: 5.2.20
     cis@ubuntu2204: 5.2.16
-    pcidss4: "2.2.6"
 
 ocil_clause: "The AllowTcpForwarding option exists and is disabled"
 
@@ -36,5 +35,5 @@ template:
     name: sshd_lineinfile
     vars:
         parameter: AllowTcpForwarding
-        rule_id: sshd_disable_tcp_forwarding
         value: 'no'
+        datatype: string

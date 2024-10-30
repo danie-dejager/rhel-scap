@@ -13,9 +13,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-83331-9
     cce@rhel8: CCE-83332-7
     cce@rhel9: CCE-83940-7
+    cce@rhel10: CCE-86854-7
     cce@sle12: CCE-91695-7
     cce@sle15: CCE-91325-1
 
@@ -24,12 +24,10 @@ references:
     cis@sle15: 6.1.5
     cis@ubuntu2004: 6.1.6
     cis@ubuntu2204: 6.1.2
-    disa: CCI-002223
+    disa: CCI-000366
     nist: AC-6 (1)
     pcidss: Req-8.7.c
-    pcidss4: '2.2.6'
     srg: SRG-OS-000480-GPOS-00227
-    stigid@rhel9: RHEL-09-232080
 
 ocil_clause: '{{{ ocil_clause_file_permissions(file="/etc/passwd-", perms="-rw-r--r--") }}}'
 

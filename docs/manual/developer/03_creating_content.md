@@ -160,16 +160,16 @@ multiple benchmarks in our project:
 
 The **Linux OS** benchmark describes Linux Operating System in general.
 This benchmark is used by multiple ComplianceAsCode products, eg.
-`rhel7`, `fedora`, `ubuntu1604`, `sle15` etc. The benchmark is located
+`rhel9`, `fedora`, `ubuntu1604`, `sle15` etc. The benchmark is located
 in `/linux_os/guide`.
 
 The products specify which benchmark they use as a source of content in
 their `product.yml` file using `benchmark_root` key. For example,
-`rhel7` product specifies that it uses the Linux OS benchmark.
+`rhel9` product specifies that it uses the Linux OS benchmark.
 
-    $ cat products/rhel7/product.yml
-    product: rhel7
-    full_name: Red Hat Enterprise Linux 7
+    $ cat products/rhel9/product.yml
+    product: rhel9
+    full_name: Red Hat Enterprise Linux 9
     type: platform
 
     benchmark_root: "../linux_os/guide"
@@ -241,7 +241,7 @@ layout:
 -   **Do not** use capital letters
 
 -   If product versions are required, use major or LTS versions only. For
-    example, `rhel7`, `ubuntu2004`, etc.
+    example, `rhel9`, `ubuntu2004`, etc.
 
 -   If the content does not depend on specific versions,
     **do not** add version numbers. For example: `fedora`, `firefox`, etc.
@@ -251,8 +251,8 @@ using and navigating the content.
 
 For example:
 
-    $ tree -d products/rhel7
-    products/rhel7
+    $ tree -d products/rhel9
+    products/rhel9
     ├── kickstart
     ├── overlays
     ├── profiles
@@ -363,7 +363,7 @@ all_cmake_products=(
 <pre>
 ...
 product_directories = ['debian11', 'fedora', 'ol7', 'ol8', 'opensuse',
-                       'rhel7', 'rhel8', 'sle12',
+                       'rhel8', 'rhel9', 'sle12',
                        'ubuntu1604', 'ubuntu1804', 'rhosp13',
                        'chromium', 'eap6', 'firefox',
                        'example'<b>, 'custom6'</b>]
@@ -390,7 +390,7 @@ MULTI_PLATFORM_LIST = ["rhel", "fedora", "rhosp", "rhv", "debian", "ubuntu",
 <pre>
 ...
 MULTI_PLATFORM_MAPPING = {
-    "multi_platform_debian": ["debian10", "debian11"],
+    "multi_platform_debian": ["debian11", "debian12"],
     "multi_platform_example": ["example"],
     <b>"multi_platform_custom": ["custom6"],</b>
     "multi_platform_fedora": ["fedora"],
@@ -700,6 +700,7 @@ Nesting can be accomplished both by
 * nesting whole control definitions, or by
 * nesting references to existing controls in the `policy:control` format, where the `policy:` part can be skipped
 if the reference points to a control in that policy.
+ * To nest all controls of a policy level, use `all` followed by the level. e.g: `cis_ocp4_1_4_0:all:level_2`.
 
 Nesting using references allows reuse of controls across multiple policies.
 
@@ -922,7 +923,9 @@ The `status` key may hold the following values:
                 automation).
 
 * `automated`: The control is addressed by the product and can be automatically
-               checked for.
+               checked for. In case a part of a requirement cannot be
+               reasonably automated but the rest is fully automated, this
+               status is appropriate as well.
 
 * `manual`: The control cannot or should not be automated, and should be addressed manually.
 
@@ -962,7 +965,7 @@ controls:
     - https://my-ticket-tracker.com/issue/2
 ```
 
-
+(controls_file_format)=
 ### Controls file format
 
 This is a complete schema of the YAML file format.
@@ -974,7 +977,7 @@ original_title: used as a reference for policies not yet available in English
 source: a link to the original policy, eg. a URL of a PDF document
 controls_dir: a directory containing files representing controls that will be imported into this policy
 reference_type: Reference type represented by control IDs in this policy.
-product: product ID, set if the policy is specific to a single product.
+product: list of product IDs, set if the policy is specific to a single or number of products.
 levels: a list of levels, the first one is default
   - id: level ID (required key)
     inherits_from: a list of IDs of levels inheriting from
@@ -1066,6 +1069,7 @@ controls:
       - other-policy:other-control
 ```
 
+(auto_ref_controls_to_rules)=
 ### Using Controls for Automated Reference Assignment to Rules
 
 Control files inherently establish the correspondence between the requirements of a specified policy and individual rules.
@@ -1240,7 +1244,7 @@ the different status options that were documented earlier in this
 documentation.
 
 ```
-$ utils/controleval.py stats -i cis_rhel7 -l l2_server
+$ utils/controleval.py stats -i cis_rhel9 -l l2_server -p rhel9
 ```
 
 For more details about the `controleval.py` too, run `utils/controleval.py --help`.
@@ -1254,7 +1258,7 @@ In order for export for DISA the IDs of your control must be SRG ID form the Gen
 
 If you have an existing product that you want to base your new STIG you can create the skeleton with the following command:
 
-    $ ./utils/build_stig_control.py --split -p rhel9 -m shared/references/disa-os-srg-v2r7.xml -o controls/srg_gpos.yml
+    $ ./utils/build_stig_control.py --split -p rhel9 -m shared/references/disa-os-srg-v3r1.xml -o controls/srg_gpos.yml
 
 The manual (`-m`) should be an SRG XML from DISA.
 

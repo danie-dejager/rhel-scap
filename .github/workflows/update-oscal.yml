@@ -26,9 +26,9 @@ jobs:
                       catalog-name: "nist_rev4_800_53"
         steps:
             - name: Checkout
-              uses: actions/checkout@v4
+              uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
             - name: Install Python
-              uses: actions/setup-python@v5
+              uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5
               with:
                   python-version: '3.9'
             - name: Install python deps
@@ -45,7 +45,7 @@ jobs:
                   trestle href --name "${{ matrix.variables.profile-name }}" -hr "trestle://catalogs/${{ matrix.variables.catalog-name }}/catalog.json"
               working-directory: ./shared/references/oscal
             - name: Update content
-              uses: peter-evans/create-pull-request@v6.0.0
+              uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
               with:
                   base: master
                   branch: "oscal-update-${{ github.run_id }}"

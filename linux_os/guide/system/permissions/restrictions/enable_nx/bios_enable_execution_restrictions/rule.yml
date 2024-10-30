@@ -17,9 +17,9 @@ severity: medium
 
 identifiers:
     cce@rhcos4: CCE-88129-2
-    cce@rhel7: CCE-27099-1
     cce@rhel8: CCE-83918-3
     cce@rhel9: CCE-88577-2
+    cce@rhel10: CCE-89763-7
     cce@sle12: CCE-91563-7
     cce@sle15: CCE-91254-3
 
@@ -35,14 +35,15 @@ references:
     iso27001-2013: A.12.1.2,A.12.5.1,A.12.6.2,A.14.2.2,A.14.2.3,A.14.2.4
     nist: SC-39,CM-6(a)
     nist-csf: PR.IP-1
-    pcidss4: "2.2.1"
     srg: SRG-OS-000433-GPOS-00192,SRG-APP-000450-CTR-001105
     stigid@ol8: OL08-00-010420
     stigid@rhel8: RHEL-08-010420
     stigid@ubuntu2004: UBTU-20-010447
+    stigid@ubuntu2204: UBTU-22-213025
 
 # In aarch64 cpus the bit is XN and it is not disableable
-platform: machine and not aarch64_arch
+# In ppc64le cpus the bit is not applicable
+platform: system_with_kernel and not aarch64_arch and not ppc64le_arch
 
 ocil: |-
     Verify the NX (no-execution) bit flag is set on the system.

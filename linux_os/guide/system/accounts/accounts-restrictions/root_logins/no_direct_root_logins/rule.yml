@@ -28,9 +28,9 @@ severity: medium
 
 identifiers:
     cce@rhcos4: CCE-82698-2
-    cce@rhel7: CCE-27294-8
     cce@rhel8: CCE-80840-2
     cce@rhel9: CCE-83625-4
+    cce@rhel10: CCE-87481-8
     cce@sle12: CCE-91497-8
     cce@sle15: CCE-91427-5
 
@@ -47,7 +47,6 @@ references:
     nerc-cip: CIP-003-8 R5.1.1,CIP-003-8 R5.3,CIP-004-6 R2.2.3,CIP-004-6 R2.3,CIP-007-3 R5.1,CIP-007-3 R5.1.2,CIP-007-3 R5.2,CIP-007-3 R5.3.1,CIP-007-3 R5.3.2,CIP-007-3 R5.3.3
     nist: IA-2,CM-6(a)
     nist-csf: PR.AC-1,PR.AC-6,PR.AC-7
-    pcidss4: "8.6.1"
 
 ocil_clause: 'the /etc/securetty file is not empty'
 
@@ -57,7 +56,7 @@ ocil: |-
     <pre>cat /etc/securetty</pre>
     If any output is returned, this is a finding.
 
-platform: machine
+platform: system_with_kernel
 
 warnings:
     - general: |-

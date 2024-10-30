@@ -21,9 +21,9 @@ severity: unknown
 
 identifiers:
     cce@rhcos4: CCE-82740-2
-    cce@rhel7: CCE-81047-3
     cce@rhel8: CCE-81048-1
     cce@rhel9: CCE-83871-4
+    cce@rhel10: CCE-87344-8
     cce@sle12: CCE-92306-0
     cce@sle15: CCE-92460-5
 
@@ -33,8 +33,8 @@ references:
     cis@ubuntu1804: 1.1.13
     cis@ubuntu2004: 1.1.18
     cis@ubuntu2204: 1.1.7.2
+    disa: CCI-001764
     srg: SRG-OS-000368-GPOS-00154
-    stigid@rhel9: RHEL-09-231045
 
 platform: machine and mount[home]
 

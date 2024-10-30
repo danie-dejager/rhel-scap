@@ -34,6 +34,7 @@ rationale: |-
 severity: high
 
 identifiers:
+    cce@rhel10: CCE-89006-1
     cce@sle12: CCE-91482-0
     cce@sle15: CCE-85796-1
 
@@ -50,9 +51,7 @@ references:
     nerc-cip: CIP-003-8 R4.2,CIP-003-8 R6,CIP-007-3 R4,CIP-007-3 R4.1,CIP-007-3 R4.2,CIP-007-3 R5.1
     nist: CM-5(3),SI-7,SC-12,SC-12(3),CM-6(a)
     nist-csf: PR.DS-6,PR.DS-8,PR.IP-1
-    ospp: FPT_TUD_EXT.1,FPT_TUD_EXT.2
     pcidss: Req-6.2
-    pcidss4: "6.3.3"
     srg: SRG-OS-000366-GPOS-00153
 
 ocil_clause: 'the SUSE GPG Key is not installed'

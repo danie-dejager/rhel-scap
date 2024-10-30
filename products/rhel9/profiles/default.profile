@@ -56,6 +56,7 @@ selections:
     - dconf_gnome_screensaver_lock_locked
     - package_ntpdate_removed
     - package_avahi_removed
+    - package_cups_removed
     - file_groupowner_efi_user_cfg
     - set_loopback_traffic
     - ntpd_specify_multiple_servers
@@ -370,7 +371,6 @@ selections:
     - audit_rules_unsuccessful_file_modification_fchownat
     - sebool_openvpn_enable_homedirs
     - zipl_enable_selinux
-    - file_permissions_systemmap
     - audit_rules_unsuccessful_file_modification_open_o_creat
     - kernel_config_ipv6
     - audit_rules_successful_file_modification_chown
@@ -553,3 +553,11 @@ selections:
     - audit_rules_unsuccessful_file_modification_fchmodat
     - sebool_polipo_session_users
     - sebool_cluster_manage_all_files
+    - configure_firewalld_ports
+    - journald_forward_to_syslog
+    - rsyslog_filecreatemode
+    - set_nftables_table
+    - sshd_use_approved_ciphers
+    - configure_bashrc_exec_tmux
+    - agent_mfetpd_running
+    - package_mcafeetp_installed

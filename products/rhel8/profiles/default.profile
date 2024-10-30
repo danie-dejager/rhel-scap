@@ -44,6 +44,8 @@ selections:
     - harden_openssl_crypto_policy
     - dir_perms_world_writable_system_owned
     - xwindows_remove_packages
+    - package_avahi_removed
+    - package_cups_removed
     - package_iptables-services_removed
     - sebool_httpd_can_network_memcache
     - sebool_git_system_use_nfs
@@ -451,7 +453,6 @@ selections:
     - sebool_openvpn_enable_homedirs
     - zipl_enable_selinux
     - bios_disable_usb_boot
-    - file_permissions_systemmap
     - audit_rules_unsuccessful_file_modification_open_o_creat
     - kernel_config_ipv6
     - service_rpcgssd_disabled
@@ -709,3 +710,5 @@ selections:
     - sebool_cluster_manage_all_files
     - iptables_rules_for_open_ports
     - dovecot_configure_ssl_key
+    - banner_etc_motd
+    - banner_etc_issue_net

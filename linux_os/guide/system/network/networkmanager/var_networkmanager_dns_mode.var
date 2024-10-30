@@ -1,6 +1,6 @@
 documentation_complete: true
 
-title: 'NetoworkManager DNS Mode'
+title: 'NetworkManager DNS Mode'
 
 type: string
 
@@ -17,3 +17,4 @@ operator: 'equals'
 options:
     none: none
     default: default
+    explicit_default: default

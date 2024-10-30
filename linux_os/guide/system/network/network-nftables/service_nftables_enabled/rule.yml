@@ -16,7 +16,6 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-86723-4
     cce@rhel8: CCE-86725-9
     cce@sle15: CCE-92560-2
 
@@ -33,7 +32,7 @@ ocil: |-
 fixtext: |-
     {{{ fixtext_service_enabled("nftables") }}}
 
-platform: machine and package[nftables] and service_disabled[firewalld]
+platform: system_with_kernel and package[nftables] and service_disabled[firewalld]
 
 template:
     name: service_enabled

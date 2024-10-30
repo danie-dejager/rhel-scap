@@ -13,16 +13,15 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-82347-6
     cce@rhel8: CCE-80993-9
     cce@rhel9: CCE-86280-5
+    cce@rhel10: CCE-88682-0
 
 references:
-    disa: CCI-001954
+    disa: CCI-004046
     ism: 1382,1384,1386
     nist: CM-6(a)
     srg: SRG-OS-000375-GPOS-00160
-    stigid@rhel9: RHEL-09-611175
 
 ocil_clause: 'the package is not installed'
 

@@ -15,11 +15,12 @@ severity: medium
 identifiers:
     cce@rhel8: CCE-82722-0
     cce@rhel9: CCE-90836-8
+    cce@rhel10: CCE-86852-1
 
 references:
+    disa: CCI-000366
     ospp: FIA_UAU.5,FTP_ITC_EXT.1,FCS_SSH_EXT.1,FCS_SSHC_EXT.1
     srg: SRG-OS-000480-GPOS-00227
-    stigid@rhel9: RHEL-09-255020
 
 ocil_clause: 'the package is not installed'
 

@@ -15,14 +15,16 @@ severity: medium
 
 {{% if 'rhel' in product %}}
 platform: package[logrotate] and os_linux[rhel]>=9
+{{% elif 'ol' in product %}}
+platform: package[logrotate] and os_linux[ol]>=9
 {{% else %}}
 platform: package[logrotate]
 {{% endif %}}
 
 identifiers:
-    cce@rhel7: CCE-86156-7
     cce@rhel8: CCE-86157-5
     cce@rhel9: CCE-86158-3
+    cce@rhel10: CCE-87463-6
     cce@sle12: CCE-92401-9
     cce@sle15: CCE-92585-9
 
@@ -38,7 +40,6 @@ references:
     nist: CM-6(a)
     nist-csf: PR.PT-1
     pcidss: Req-10.7
-    pcidss4: '10.5.1'
 
 ocil_clause: 'logrotate timer is not enabled'
 
@@ -50,7 +51,7 @@ template:
         timername: logrotate
         packagename: logrotate
 
-{{% if product in ["rhel7", "rhel8"] %}}
+{{% if product in ["rhel8"] %}}
 warnings:
     - general:
         The Systemd unit <tt>logrotate.timer</tt> does not exist in

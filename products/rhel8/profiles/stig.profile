@@ -1,7 +1,7 @@
 documentation_complete: true
 
 metadata:
-    version: V1R13
+    version: V2R1
     SMEs:
         - mab879
         - ggbecker
@@ -12,7 +12,7 @@ title: 'DISA STIG for Red Hat Enterprise Linux 8'
 
 description: |-
     This profile contains configuration checks that align to the
-    DISA STIG for Red Hat Enterprise Linux 8 V1R13.
+    DISA STIG for Red Hat Enterprise Linux 8 V2R1.
 
     In addition to being applicable to Red Hat Enterprise Linux 8, DISA recognizes this
     configuration baseline as applicable to the operating system tier of
@@ -32,6 +32,7 @@ selections:
     - var_password_pam_difok=8
     - var_password_pam_maxrepeat=3
     - var_password_hashing_algorithm=SHA512
+    - var_password_hashing_algorithm_pam=sha512
     - var_password_pam_maxclassrepeat=4
     - var_password_pam_minclass=4
     - var_accounts_minimum_age_login_defs=1
@@ -480,7 +481,8 @@ selections:
     - accounts_have_homedir_login_defs
 
     # RHEL-08-010770
-    - file_permission_user_init_files
+    - file_permission_user_init_files_root
+    - var_user_initialization_files_regex=all_dotfiles
 
     # RHEL-08-010780
     - no_files_unowned_by_user
@@ -545,7 +547,7 @@ selections:
 
     # RHEL-08-020035
     - logind_session_timeout
-    - var_logind_session_timeout=15_minutes
+    - var_logind_session_timeout=10_minutes
 
     # RHEL-08-020039
     - package_tmux_installed

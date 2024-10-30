@@ -12,6 +12,12 @@ from ssg.constants import ansible_system as ansible_rem_system
 from ssg.constants import puppet_system as puppet_rem_system
 from ssg.constants import anaconda_system as anaconda_rem_system
 from ssg.constants import ignition_system as ignition_rem_system
+from ssg.constants import oval_namespace, SCE_SYSTEM
+
+CHECK_SYSTEM_URI_TO_TYPE = {
+    oval_namespace: "oval",
+    SCE_SYSTEM: "sce",
+}
 
 SYSTEM_ATTRIBUTE = {
     'bash': bash_rem_system,
@@ -101,11 +107,18 @@ def instance_in_platforms(inst, platforms):
         (hasattr(platforms, "__iter__") and inst.get("idref") in platforms)
 
 
+def make_applicable_in_containers(root):
+    remove_machine_platform(root)
+    remove_machine_remediation_condition(root)
+
+
 def remove_machine_platform(root):
     remove_platforms_from_element(root, "xccdf-1.2:Rule", "cpe:/a:machine")
     remove_platforms_from_element(root, "xccdf-1.2:Group", "cpe:/a:machine")
     remove_platforms_from_element(root, "xccdf-1.2:Rule", "#machine")
     remove_platforms_from_element(root, "xccdf-1.2:Group", "#machine")
+    remove_platforms_from_element(root, "xccdf-1.2:Rule", "#system_with_kernel")
+    remove_platforms_from_element(root, "xccdf-1.2:Group", "#system_with_kernel")
 
 
 def remove_platforms(root):
@@ -135,6 +148,7 @@ def remove_bash_machine_remediation_condition(root):
     system = "urn:xccdf:fix:script:sh"
     considered_machine_platform_checks = [
         r"\[\s+!\s+-f\s+/\.dockerenv\s+\]\s+&&\s+\[\s+!\s+-f\s+/run/\.containerenv\s+\]",
+        r"rpm\s+--quiet\s+-q\s+kernel"
     ]
     repl = "true"
     _replace_in_fix(root, system, considered_machine_platform_checks, repl)
@@ -144,6 +158,7 @@ def remove_ansible_machine_remediation_condition(root):
     system = "urn:xccdf:fix:script:ansible"
     considered_machine_platform_checks = [
         r"\bansible_virtualization_type\s+not\s+in.*docker.*",
+        r"\"kernel\"\s+in\s+ansible_facts.packages"
     ]
     repl = "True"
     _replace_in_fix(root, system, considered_machine_platform_checks, repl)
@@ -307,3 +322,20 @@ def find_fix_in_benchmark(datastream, benchmark_id, rule_id, fix_type='bash', lo
 
     fix = rule.find("xccdf-1.2:fix[@system='{0}']".format(system_attribute), PREFIX_TO_NS)
     return fix
+
+
+def find_checks_in_rule(datastream, benchmark_id, rule_id):
+    """
+    Return check types for given rule from benchmark.
+    """
+    checks = set()
+    rule = find_rule_in_benchmark(datastream, benchmark_id, rule_id)
+    if rule is None:
+        return checks
+    check_els = rule.findall("xccdf-1.2:check", PREFIX_TO_NS)
+    for check_el in check_els:
+        system = check_el.get("system")
+        check = CHECK_SYSTEM_URI_TO_TYPE.get(system, None)
+        if check is not None:
+            checks.add(check)
+    return checks

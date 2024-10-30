@@ -17,18 +17,17 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-80361-9
     cce@rhel8: CCE-80820-4
     cce@rhel9: CCE-89175-4
+    cce@rhel10: CCE-89799-1
 
 references:
     cui: 3.1.12
+    disa: CCI-000382
     ism: "1416"
     nist: AC-17(a),CM-6(b),CM-7(a),CM-7(b)
     srg: SRG-OS-000096-GPOS-00050
-    stigid@rhel9: RHEL-09-251035
 
-platform: machine
 
 ocil_clause: 'sshd service is not enabled in the proper firewalld zone'
 
@@ -56,7 +55,7 @@ warnings:
         the respective file. If the default SSH port is modified, it is on the administrator
         responsibility to ensure the firewalld customizations in the service port level are
         properly configured.
-{{% if product in [ 'ol9', 'rhel9' ] %}}
+{{% if product in [ 'fedora', 'ol9', 'rhel9', 'rhel10' ] %}}
     - management: |-
         {{{ full_name }}} prefers and recommends to use NetworkManager keyfiles instead of the
         <tt>ifcfg</tt> files stored in <tt>/etc/sysconfig/network-scripts</tt>. Therefore, if the

@@ -18,7 +18,6 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-82871-5
     cce@rhel8: CCE-82872-3
     cce@rhel9: CCE-84024-9
 
@@ -48,4 +47,4 @@ ocil: |-
     <tt>/etc/modprobe.conf</tt>:
     <pre xml:space="preserve">$ grep -r ipv6 /etc/modprobe.conf /etc/modprobe.d</pre>
 
-platform: machine
+platform: system_with_kernel

@@ -37,11 +37,65 @@ For example, to subtract selected rules from a given profile based on
 rules selected by another profile, run this command:
 
 ```bash
-    $ ./build-scripts/profile_tool.py sub --profile1 rhel7/profiles/ospp.profile --profile2 rhel7/profiles/pci-dss.profile
-````
+    $ ./build-scripts/profile_tool.py sub --profile1 rhel9/profiles/ospp.profile --profile2 rhel9/profiles/pci-dss.profile
+```
 
 This will result in a new YAML profile containing exclusive rules to the
 profile pointed by the `--profile1` option.
+
+The tool can also generate a list of the most used rules contained in profiles from a given data stream or benchmark.
+
+For example, to get a list of the most used rules in the benchmark for `rhel8`, run this command:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-rules build/ssg-rhel8-xccdf.xml
+```
+
+Or you can also run this command to get a list of the most used rules in the entire project:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-rules
+```
+
+Optionally, you can use this command to limit the statistics for a specific product:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-rules --products rhel9
+```
+
+The result will be a list of rules with the number of uses in the profiles.
+The list can be generated as plain text, JSON or CVS.
+Via the `--format FORMAT` parameter.
+
+The tool can also generate a list of the most used component based on rules contained in profiles from the entire project:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-components
+```
+
+Optionally, you can use this command to limit the statistics for a specific product:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-components --products rhel9
+```
+
+You can also get a list of the most used components with used rules for the RHEL9 product, you can use the `--rules` flag.
+As shown in this command:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-components --products rhel9 --rules
+```
+
+You can also use the `--all` flag to get a list of all components and rules in the output, including unused components and unused rules.
+As shown in this command:
+
+```bash
+    $ ./build-scripts/profile_tool.py most-used-components --products rhel9 --all
+```
+
+The result will be a list of rules with the number of uses in the profiles.
+The list can be generated as plain text, JSON or CVS.
+Via the `--format FORMAT` parameter.
 
 ## Generating Controls from DISA's XCCDF Files
 
@@ -70,6 +124,19 @@ Example
 
 ```bash
     $ ./utils/build_stig_control.py -p rhel8 -m shared/references/disa-stig-rhel8-v1r5-xccdf-manual.xml
+```
+
+
+## Generating Controls From a Reference
+When converting profile to use a control file this script can be helpful in creating the skeleton control.
+The output of this script will need to be adjusted to add other keys such as title or description to the controls.
+This script does require that `./utils/rule_dir_json.py` be run before this script is used.
+See `./utils/build_control_from_reference.py --help` for the full set options the script provides.
+
+
+Example
+```bash
+    $ ./utils/build_control_from_reference.py --product rhel10 --reference ospp --output controls/ospp.yml
 ```
 
 ## Generating login banner regular expressions
@@ -389,6 +456,16 @@ To execute:
     $ ./utils/import_srg_spreadsheet.py --changed 20220811_submission.xlsx --current build/cac_stig_output.xlsx -p rhel9
 ```
 
+### `utils/import_disa_stig.py` &ndash; Import Content from DISA's XML Content
+
+This script imports SRG Requirements, Check Text, and Fix Text from a DISA STIG XML File.
+This script only updates STIG items that only have one rule assigned to them.
+
+To execute:
+```bash
+$ ./utils/import_disa_stig.py --product rhel9 --control stig_rhel9 shared/references/disa-stig-rhel9-v1r2-xccdf-manual.xml
+```
+
 ## Profiling the Build System
 
 The goal of `utils/build_profiler.sh` and `utils/build_profiler_report.py` is to help developers measure and compare build times of a single product or a group of products and determine what impact their changes had on the speed of the buildsystem.
@@ -606,7 +683,7 @@ It will internally clone the upstream project, checkout these tags, generate Com
 ### `utils/oscal/build_cd_from_policy.py` &ndash; Build a Component Definition from a Policy
 
 This script builds an OSCAL Component Definition (cd) (version `1.0.4`) for an existing OSCAL profile from a policy. The script uses the
-[compliance-trestle](https://ibm.github.io/compliance-trestle/) library to build the component definition. The component definition can be used with the `compliance-trestle` CLI after generation.
+[compliance-trestle](https://github.com/oscal-compass/compliance-trestle) library to build the component definition. The component definition can be used with the `compliance-trestle` CLI after generation.
 
 Some assumption made by this script:
 
@@ -653,4 +730,37 @@ An example of how to execute the script:
 $ ./build_product ocp4
 $ ./utils/rule_dir_json.py
 $ ./utils/oscal/build_cd_from_policy.py -o build/ocp4.json -p fedramp_rev4_high -pr ocp4 -c nist_ocp4:high
+```
+
+### `utils/ansible_playbook_to_role.py` &ndash; Generates Ansible Roles and pushes them to Github
+
+This script converts the Ansible playbooks created by the build system and converts them to Ansible roles and can upload them to GitHub.
+
+
+An example of how to execute the script to generate roles locally:
+
+```bash
+$ ./build_product rhel9
+$ ./utils/ansible_playbook_to_role.py --dry-run output
+```
+
+### `utils/find_unused_rules.py` &ndash; List Rules That Are Not Used In Any Data stream
+
+This script will output rules are not in any data streams.
+To prevent false positives the script will not run if the number of build datas treams less than the total number of products in the project.
+The script assumes that `./build_project --derivatives` was executed before the script is used.
+This script does require that `./utils/rule_dir_json.py` was executed before this script is used as well.
+
+This script works by comparing rules in the data streams to the rules in the `rule_dirs.json` file.
+The script works by adding off the rule ids from the data streams to a `set`.
+Then the script converts the keys of `rule_dirs.json` to a set.
+The set of rules in the data stream is subtracted to from the set of rules in `rule_dirs.json`.
+The difference is then output to the user.
+
+Example usage:
+
+```bash
+$ ./build_product --derivatives
+$ ./utils/rule_dir_json.py
+$ ./utils/find_unused_rules.py
 ```

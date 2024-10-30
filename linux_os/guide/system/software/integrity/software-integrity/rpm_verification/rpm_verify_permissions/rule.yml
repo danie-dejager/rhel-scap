@@ -16,7 +16,7 @@ description: |-
     <pre>$ rpm -qf <i>FILENAME</i></pre>
     <br />
     Next, run the following command to reset its permissions to the correct values:
-    <pre>$ sudo rpm --setperms <i>PACKAGENAME</i></pre>
+    <pre>$ sudo rpm --restore <i>PACKAGENAME</i></pre>
 
 rationale: |-
     Permissions on system binaries and configuration files that are too generous could allow an
@@ -27,9 +27,9 @@ severity: high
 
 identifiers:
     cce@rhcos4: CCE-82687-5
-    cce@rhel7: CCE-27209-6
     cce@rhel8: CCE-80858-4
     cce@rhel9: CCE-90840-0
+    cce@rhel10: CCE-88623-4
     cce@sle12: CCE-91634-6
     cce@sle15: CCE-85782-1
 
@@ -49,10 +49,8 @@ references:
     nist: CM-6(d),CM-6(c),SI-7,SI-7(1),SI-7(6),AU-9(3),CM-6(a)
     nist-csf: PR.AC-4,PR.DS-5,PR.IP-1,PR.PT-1
     pcidss: Req-11.5
-    pcidss4: "11.5.2"
     srg: SRG-OS-000256-GPOS-00097,SRG-OS-000257-GPOS-00098,SRG-OS-000258-GPOS-00099,SRG-OS-000278-GPOS-00108
     stigid@ol7: OL07-00-010010
-    stigid@rhel7: RHEL-07-010010
 
 ocil_clause: 'there is output'
 
@@ -68,7 +66,8 @@ fixtext: |-
 
     Reset the permissions of files within a package with the following command:
 
-    $ sudo rpm --setperms [package]
+    $ sudo rpm --restore [package]
+
 
 srg_requirement: '{{{ full_name }}} must be configured so that the file permissions of system files and commands match the vendor values.'
 

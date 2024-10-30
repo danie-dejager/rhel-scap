@@ -16,9 +16,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-27443-1
     cce@rhel8: CCE-80888-1
     cce@rhel9: CCE-84156-9
+    cce@rhel10: CCE-87207-7
     cce@sle12: CCE-92239-3
     cce@sle15: CCE-91438-2
 
@@ -43,8 +43,6 @@ ocil: |-
     If network services are using the xinetd service, this is not applicable.
     <br /><br />
     {{{ ocil_service_disabled(service="xinetd") }}}
-
-platform: machine
 
 template:
     name: service_disabled

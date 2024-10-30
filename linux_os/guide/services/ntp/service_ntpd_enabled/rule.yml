@@ -21,7 +21,6 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-84253-4
     cce@rhel8: CCE-86486-8
     cce@rhel9: CCE-87863-7
     cce@sle12: CCE-91658-5
@@ -37,7 +36,6 @@ references:
     nist: CM-6(a),AU-8(1)(a)
     nist-csf: PR.PT-1
     pcidss: Req-10.4
-    pcidss4: '10.6.1'
 
 ocil: |-
     {{{ ocil_service_enabled(service="ntpd") }}}

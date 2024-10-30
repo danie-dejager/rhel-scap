@@ -16,25 +16,24 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-82159-5
     cce@rhel8: CCE-80946-7
     cce@rhel9: CCE-83842-5
+    cce@rhel10: CCE-87153-3
 
 references:
-    disa: CCI-001084
+    disa: CCI-000366,CCI-001084
     nist: CM-7(a)
     ospp: FPT_ASLR_EXT.1
     srg: SRG-OS-000480-GPOS-00227,SRG-OS-000134-GPOS-00068
     stigid@ol8: OL08-00-010422
     stigid@rhel8: RHEL-08-010422
-    stigid@rhel9: RHEL-09-212035
 
 ocil_clause: 'vsyscalls are enabled'
 
 ocil: |-
     {{{ ocil_grub2_argument("vsyscall=none") | indent(4) }}}
 
-platform: machine
+platform: machine and x86_64_arch
 
 template:
     name: grub2_bootloader_argument
@@ -47,3 +46,9 @@ fixtext: |-
 
 srg_requirement:
   {{{ full_name }}} must disable virtual syscalls.
+
+warnings:
+    - general: |-
+        The vsyscall emulation is only available on x86_64 architecture
+        (CONFIG_X86_VSYSCALL_EMULATION) making this rule not applicable
+        to other CPU architectures.

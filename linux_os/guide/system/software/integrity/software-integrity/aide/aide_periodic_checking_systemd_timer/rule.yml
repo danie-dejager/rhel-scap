@@ -22,6 +22,7 @@ severity: medium
 identifiers:
     cce@sle12: CCE-92366-4
     cce@sle15: CCE-92516-4
+    cce@slmicro5: CCE-93721-9
 
 references:
     cis-csc: 1,11,12,13,14,15,16,2,3,5,7,8,9
@@ -37,10 +38,8 @@ references:
     nist-csf: DE.CM-1,DE.CM-7,PR.DS-1,PR.DS-6,PR.DS-8,PR.IP-1,PR.IP-3
     nist@sle15: SI-6(d)
     pcidss: Req-11.5
-    pcidss4: "11.5.2"
     srg: SRG-OS-000363-GPOS-00150,SRG-OS-000446-GPOS-00200,SRG-OS-000447-GPOS-00201
     stigid@ol7: OL07-00-020030
-    stigid@rhel7: RHEL-07-020030
     stigid@sle15: SLES-15-010570
 
 platform: package[aide]

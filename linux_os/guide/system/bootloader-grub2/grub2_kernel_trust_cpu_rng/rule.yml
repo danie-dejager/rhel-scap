@@ -25,9 +25,9 @@ severity: medium
 identifiers:
     cce@rhel8: CCE-83314-5
     cce@rhel9: CCE-83841-7
+    cce@rhel10: CCE-89051-7
 
 references:
-    ospp: FCS_RBG_EXT.1.1
     srg: SRG-OS-000480-GPOS-00227
 
 ocil_clause: 'the kernel is not configured to trust the CPU RNG'

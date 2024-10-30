@@ -13,16 +13,15 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-87634-2
     cce@rhel8: CCE-85921-5
     cce@rhel9: CCE-85941-3
+    cce@rhel10: CCE-89396-6
 
 references:
     cis@ubuntu2204: 4.2.1.2
     disa: CCI-001665
     nist: SC-24
     srg: SRG-OS-000269-GPOS-00103
-    stigid@rhel9: RHEL-09-211040
 
 ocil_clause: 'the systemd-journald service is not running'
 
@@ -33,8 +32,6 @@ fixtext: |-
     {{{ fixtext_service_enabled("systemd-journald") }}}
 
 srg_requirement: '{{{ srg_requirement_service_enabled("systemd-journald") }}}'
-
-platform: machine
 
 template:
     name: service_enabled

@@ -21,12 +21,6 @@ rationale: |-
 
 severity: medium
 
-identifiers:
-    cce@rhel7: CCE-80557-2
-
-references:
-    stigid: WG340
-
 ocil_clause: 'it is not'
 
 ocil: |-

@@ -11,7 +11,7 @@ description: |-
     run the following command to determine which package owns it:
     <pre>$ rpm -qf <i>FILENAME</i></pre>
     Next, run the following command to reset its permissions to the correct values:
-    <pre>$ sudo rpm --setugids <i>PACKAGENAME</i></pre>
+    <pre>$ sudo rpm --restore <i>PACKAGENAME</i></pre>
 
 rationale: |-
     Ownership of binaries and configuration files that is incorrect could allow an unauthorized
@@ -22,9 +22,9 @@ severity: high
 
 identifiers:
     cce@rhcos4: CCE-82686-7
-    cce@rhel7: CCE-80545-7
     cce@rhel8: CCE-82196-7
     cce@rhel9: CCE-90842-6
+    cce@rhel10: CCE-90421-9
     cce@sle12: CCE-91649-4
     cce@sle15: CCE-91290-7
 
@@ -43,10 +43,8 @@ references:
     nist: CM-6(d),CM-6(c),SI-7,SI-7(1),SI-7(6),AU-9(3)
     nist-csf: PR.AC-4,PR.DS-5,PR.IP-1,PR.PT-1
     pcidss: Req-11.5
-    pcidss4: "11.5.2"
     srg: SRG-OS-000256-GPOS-00097,SRG-OS-000257-GPOS-00098,SRG-OS-000278-GPOS-00108
     stigid@ol7: OL07-00-010010
-    stigid@rhel7: RHEL-07-010010
 
 ocil_clause: 'there is output'
 
@@ -62,7 +60,8 @@ fixtext: |-
 
     Reset the user and group ownership of files within a package with the following command:
 
-    $ sudo rpm --setugids [package]
+    $ sudo rpm --restore [package]
+
 
 srg_requirement: '{{{ full_name }}} must be configured so that the file ownership and group membership of system files and commands match the vendor values.'
 

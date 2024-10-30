@@ -21,9 +21,9 @@ severity: medium
 
 identifiers:
     cce@rhcos4: CCE-82865-7
-    cce@rhel7: CCE-80146-4
     cce@rhel8: CCE-82742-8
     cce@rhel9: CCE-83856-5
+    cce@rhel10: CCE-90154-6
     cce@sle12: CCE-92308-6
     cce@sle15: CCE-92462-1
 
@@ -43,7 +43,6 @@ references:
     srg: SRG-OS-000480-GPOS-00227
     stigid@ol8: OL08-00-010600
     stigid@rhel8: RHEL-08-010600
-    stigid@rhel9: RHEL-09-231085
 
 platform: machine
 

@@ -10,8 +10,8 @@ rationale: 'To assure accountability and prevent unauthenticated access, groups 
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-86327-4
     cce@rhel8: CCE-86328-2
+    cce@rhel10: CCE-88449-4
     cce@sle12: CCE-92207-0
     cce@sle15: CCE-91340-0
 
@@ -20,7 +20,6 @@ references:
     cis@sle15: 6.2.17
     cis@ubuntu2004: 6.2.16
     cis@ubuntu2204: 6.2.8
-    pcidss4: "8.2.1"
 
 ocil_clause: 'has duplicate group names'
 

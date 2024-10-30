@@ -12,9 +12,9 @@ rationale: |-
 severity: medium
 
 identifiers:
-    cce@rhel7: CCE-83412-7
     cce@rhel8: CCE-83413-5
     cce@rhel9: CCE-83949-8
+    cce@rhel10: CCE-87502-1
     cce@sle12: CCE-91696-5
     cce@sle15: CCE-91326-9
 
@@ -23,12 +23,10 @@ references:
     cis@sle15: 6.1.6
     cis@ubuntu2004: 6.1.7
     cis@ubuntu2204: 6.1.6
-    disa: CCI-002223
+    disa: CCI-000366
     nist: AC-6 (1)
     pcidss: Req-8.7.c
-    pcidss4: '2.2.6'
     srg: SRG-OS-000480-GPOS-00227
-    stigid@rhel9: RHEL-09-232160
 
 ocil_clause: '{{{ ocil_clause_file_owner(file="/etc/shadow-", owner="root") }}}'
 

@@ -157,7 +157,7 @@ selections:
     - grub2_enable_apparmor
 
     #### 1.6.1.3 Ensure all AppArmor Profiles are in enforce or complain mode (Automated)
-    - var_apparmor_mode=complain
+    - var_apparmor_mode=enforce
     - all_apparmor_profiles_in_enforce_complain_mode
 
     #### 1.6.1.4 Ensure all AppArmor Profiles are enforcing (Automated)
@@ -194,6 +194,7 @@ selections:
     # Skip due to being Level 2
 
     ### 1.8.2 Ensure GDM login banner is configured (Automated)
+    - enable_dconf_user_profile
     - login_banner_text=cis_default
     - dconf_gnome_banner_enabled
     - dconf_gnome_login_banner_text
@@ -846,6 +847,7 @@ selections:
 
     ## 5.4 Configure PAM ##
     ### 5.4.1 Ensure password creation requirements are configured (Automated)
+    - package_pam_pwquality_installed
     - var_password_pam_minlen=14
     - accounts_password_pam_minlen
     - var_password_pam_minclass=4
