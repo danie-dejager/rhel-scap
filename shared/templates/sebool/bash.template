@@ -1,4 +1,4 @@
-# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_rhv,SUSE Linux Enterprise 15
+# platform = multi_platform_rhel,multi_platform_fedora,multi_platform_ol,multi_platform_almalinux,multi_platform_rhv,SUSE Linux Enterprise 15
 # reboot = false
 # strategy = enable
 # complexity = low
@@ -16,7 +16,7 @@
 {{{ bash_package_install("libsemanage-python") }}}
 {{% endif %}}
 
-if selinuxenabled; then
+if selinuxenabled || {{{ bash_bootc_build() }}} ; then
 {{% if SEBOOL_BOOL %}}
     setsebool -P {{{ SEBOOLID }}} {{{ SEBOOL_BOOL }}}
 {{% else %}}

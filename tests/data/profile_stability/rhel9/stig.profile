@@ -1,6 +1,6 @@
 description: 'This profile contains configuration checks that align to the
 
-    DISA STIG for Red Hat Enterprise Linux 9 V2R1.
+    DISA STIG for Red Hat Enterprise Linux 9 V2R3.
 
 
     In addition to being applicable to Red Hat Enterprise Linux 9, DISA recognizes
@@ -23,7 +23,7 @@ description: 'This profile contains configuration checks that align to the
 extends: null
 hidden: ''
 metadata:
-    version: V2R1
+    version: V2R3
     SMEs:
     - mab879
     - ggbecker
@@ -43,7 +43,6 @@ selections:
 - accounts_minimum_age_login_defs
 - accounts_no_uid_except_zero
 - accounts_password_all_shadowed_sha512
-- accounts_password_minlen_login_defs
 - accounts_password_pam_dcredit
 - accounts_password_pam_dictcheck
 - accounts_password_pam_difok
@@ -56,7 +55,7 @@ selections:
 - accounts_password_pam_ocredit
 - accounts_password_pam_pwquality_password_auth
 - accounts_password_pam_pwquality_system_auth
-- accounts_password_pam_retry
+- accounts_password_pam_pwquality_retry
 - accounts_password_pam_ucredit
 - accounts_password_pam_unix_rounds_password_auth
 - accounts_password_pam_unix_rounds_system_auth
@@ -159,7 +158,6 @@ selections:
 - audit_rules_usergroup_modification_passwd
 - audit_rules_usergroup_modification_shadow
 - auditd_audispd_configure_sufficiently_large_partition
-- auditd_audispd_syslog_plugin_activated
 - auditd_data_disk_error_action_stig
 - auditd_data_disk_full_action_stig
 - auditd_data_retention_action_mail_acct
@@ -181,19 +179,14 @@ selections:
 - chronyd_server_directive
 - chronyd_specify_remote_server
 - clean_components_post_updating
-- configure_bashrc_tmux
 - configure_bind_crypto_policy
 - configure_crypto_policy
-- configure_firewalld_ports
 - configure_kerberos_crypto_policy
 - configure_libreswan_crypto_policy
 - configure_opensc_card_drivers
 - configure_openssl_crypto_policy
 - configure_openssl_tls_crypto_policy
 - configure_ssh_crypto_policy
-- configure_tmux_lock_after_time
-- configure_tmux_lock_command
-- configure_tmux_lock_keybinding
 - configure_usbguard_auditbackend
 - configured_firewalld_default_deny
 - coredump_disable_backtraces
@@ -206,6 +199,7 @@ selections:
 - dconf_gnome_disable_restart_shutdown
 - dconf_gnome_disable_user_list
 - dconf_gnome_lock_screen_on_smartcard_removal
+- dconf_gnome_login_banner_text
 - dconf_gnome_screensaver_idle_delay
 - dconf_gnome_screensaver_lock_delay
 - dconf_gnome_screensaver_lock_enabled
@@ -217,8 +211,11 @@ selections:
 - dir_permissions_library_dirs
 - dir_perms_world_writable_root_owned
 - dir_perms_world_writable_sticky_bits
+- directory_groupowner_sshd_config_d
 - directory_group_ownership_var_log_audit
 - directory_ownership_var_log_audit
+- directory_owner_sshd_config_d
+- directory_permissions_sshd_config_d
 - disable_ctrlaltdel_burstaction
 - disable_ctrlaltdel_reboot
 - disable_host_auth
@@ -233,6 +230,7 @@ selections:
 - ensure_gpgcheck_local_packages
 - ensure_gpgcheck_never_disabled
 - ensure_redhat_gpgkey_installed
+- fapolicy_default_deny
 - file_audit_tools_group_ownership
 - file_audit_tools_ownership
 - file_audit_tools_permissions
@@ -253,8 +251,10 @@ selections:
 - file_groupowner_etc_shadow
 - file_groupowner_grub2_cfg
 - file_groupowner_sshd_config
+- file_groupowner_sshd_drop_in_config
 - file_groupowner_var_log
 - file_groupowner_var_log_messages
+- file_groupownership_audit_configuration
 - file_groupownership_home_directories
 - file_groupownership_system_commands_dirs
 - file_owner_backup_etc_group
@@ -274,11 +274,14 @@ selections:
 - file_owner_etc_shadow
 - file_owner_grub2_cfg
 - file_owner_sshd_config
+- file_owner_sshd_drop_in_config
 - file_owner_var_log
 - file_owner_var_log_messages
+- file_ownership_audit_configuration
 - file_ownership_binary_dirs
 - file_ownership_library_dirs
 - file_permission_user_init_files_root
+- file_permissions_audit_configuration
 - file_permissions_backup_etc_group
 - file_permissions_backup_etc_gshadow
 - file_permissions_backup_etc_passwd
@@ -291,7 +294,6 @@ selections:
 - file_permissions_cron_weekly
 - file_permissions_crontab
 - file_permissions_etc_audit_auditd
-- file_permissions_etc_audit_rulesd
 - file_permissions_etc_group
 - file_permissions_etc_gshadow
 - file_permissions_etc_passwd
@@ -299,12 +301,14 @@ selections:
 - file_permissions_home_directories
 - file_permissions_library_dirs
 - file_permissions_sshd_config
+- file_permissions_sshd_drop_in_config
 - file_permissions_sshd_private_key
 - file_permissions_sshd_pub_key
 - file_permissions_ungroupowned
 - file_permissions_var_log
 - file_permissions_var_log_audit
 - file_permissions_var_log_messages
+- file_sshd_50_redhat_exists
 - firewalld-backend
 - firewalld_sshd_port_enabled
 - gid_passwd_group_same
@@ -343,7 +347,6 @@ selections:
 - mount_option_home_nodev
 - mount_option_home_noexec
 - mount_option_home_nosuid
-- mount_option_krb_sec_remote_filesystems
 - mount_option_nodev_nonroot_local_partitions
 - mount_option_nodev_remote_filesystems
 - mount_option_nodev_removable_partitions
@@ -372,12 +375,12 @@ selections:
 - no_files_unowned_by_user
 - no_host_based_files
 - no_shelllogin_for_systemaccounts
-- no_tmux_in_shells
 - no_user_host_based_files
 - package_aide_installed
 - package_audispd-plugins_installed
 - package_audit_installed
 - package_chrony_installed
+- package_cron_installed
 - package_crypto-policies_installed
 - package_fapolicyd_installed
 - package_firewalld_installed
@@ -404,7 +407,6 @@ selections:
 - package_sudo_installed
 - package_telnet-server_removed
 - package_tftp-server_removed
-- package_tmux_installed
 - package_tuned_removed
 - package_usbguard_installed
 - package_vsftpd_removed
@@ -448,7 +450,6 @@ selections:
 - set_password_hashing_algorithm_libuserconf
 - set_password_hashing_algorithm_logindefs
 - set_password_hashing_algorithm_passwordauth
-- set_password_hashing_min_rounds_logindefs
 - ssh_keys_passphrase_protected
 - sshd_disable_compression
 - sshd_disable_empty_passwords
@@ -463,12 +464,13 @@ selections:
 - sshd_enable_pubkey_auth
 - sshd_enable_strictmodes
 - sshd_enable_warning_banner
+- sshd_include_crypto_policy
 - sshd_print_last_log
 - sshd_rekey_limit
 - sshd_set_idle_timeout
 - sshd_set_keepalive
 - sshd_set_loglevel_verbose
-- sshd_use_priv_separation
+- sshd_use_strong_macs
 - sshd_x11_use_localhost
 - sssd_certificate_verification
 - sssd_enable_certmap
@@ -515,7 +517,6 @@ selections:
 - sysctl_net_ipv6_conf_default_accept_redirects
 - sysctl_net_ipv6_conf_default_accept_source_route
 - sysctl_user_max_user_namespaces
-- tftpd_uses_secure_mode
 - usbguard_generate_policy
 - use_pam_wheel_for_su
 - wireless_disable_interfaces
@@ -547,13 +548,14 @@ selections:
 - var_accounts_minimum_age_login_defs=1
 - var_password_pam_dcredit=1
 - var_password_pam_lcredit=1
-- var_password_pam_unix_rounds=5000
+- var_password_pam_unix_rounds=100000
 - var_password_pam_retry=3
 - var_selinux_policy_name=targeted
 - var_selinux_state=enforcing
 - var_logind_session_timeout=15_minutes
 - var_accounts_fail_delay=4
 - var_accounts_max_concurrent_login_sessions=10
+- var_accounts_tmout=10_min
 - var_accounts_authorized_local_users_regex=rhel9
 - var_accounts_passwords_pam_faillock_unlock_time=never
 - var_accounts_passwords_pam_faillock_fail_interval=900
@@ -566,6 +568,7 @@ selections:
 - var_sshd_set_keepalive=1
 - var_rekey_limit_size=1G
 - var_rekey_limit_time=1hour
+- sshd_strong_macs=stig_rhel9
 - sshd_approved_ciphers=stig_rhel9
 - var_networkmanager_dns_mode=explicit_default
 - var_multiple_time_servers=stig
@@ -573,6 +576,8 @@ selections:
 - var_user_initialization_files_regex=all_dotfiles
 - login_banner_text=dod_banners
 - var_authselect_profile=sssd
+- sysctl_user_max_user_namespaces.role=unscored
+- sysctl_user_max_user_namespaces.severity=info
 unselected_groups: []
 platforms: !!set {}
 cpe_names: !!set {}
