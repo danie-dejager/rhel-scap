@@ -6,9 +6,6 @@ platform: ocp4-node
 
 metadata:
     SMEs:
-        - JAORMX
-        - mrogers950
-        - jhrozek
         - rhmdnd
         - Vincent056
         - yuumasato
@@ -16,7 +13,7 @@ metadata:
 
 description: |-
     This profile defines a baseline that aligns to the Center for Internet Security®
-    Red Hat OpenShift Container Platform 4 Benchmark™, V1.5.
+    Red Hat OpenShift Container Platform 4 Benchmark™, V1.7.
 
     This profile includes Center for Internet Security®
     Red Hat OpenShift Container Platform 4 CIS Benchmarks™ content.
@@ -26,4 +23,4 @@ description: |-
 
     This profile is applicable to OpenShift versions 4.12 and greater.
 
-extends: cis-node-1-5
+extends: cis-node-1-7

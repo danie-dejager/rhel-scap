@@ -14,8 +14,8 @@ description: |-
     This profile contains configuration checks that align to the
     DISA STIG for Red Hat Enterprise Linux 8 V2R2.
 
-    In addition to being applicable to Red Hat Enterprise Linux 8, DISA recognizes this
-    configuration baseline as applicable to the operating system tier of
+    In addition to being applicable to Red Hat Enterprise Linux 8, this
+    configuration baseline is applicable to the operating system tier of
     Red Hat technologies that are based on Red Hat Enterprise Linux 8, such as:
 
     - Red Hat Enterprise Linux Server
@@ -41,7 +41,7 @@ selections:
     - var_password_pam_remember_control_flag=requisite_or_required
     - var_selinux_state=enforcing
     - var_selinux_policy_name=targeted
-    - var_password_pam_unix_rounds=5000
+    - var_password_hashing_min_rounds_login_defs=100000
     - var_password_pam_minlen=15
     - var_password_pam_ocredit=1
     - var_password_pam_dcredit=1
