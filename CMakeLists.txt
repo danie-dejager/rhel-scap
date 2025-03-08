@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required(VERSION 3.16)
 
 # Strictly speaking in-source will work but will be very messy so it is not supported.
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
@@ -114,6 +114,7 @@ option(SSG_PRODUCT_RHEL10 "If enabled, the RHEL10 SCAP content will be built" ${
 option(SSG_PRODUCT_RHV4 "If enabled, the RHV4 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
 option(SSG_PRODUCT_SLE12 "If enabled, the SLE12 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
 option(SSG_PRODUCT_SLE15 "If enabled, the SLE15 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
+option(SSG_PRODUCT_TENCENTOS4 "If enabled, the TencentOS Server 4 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
 option(SSG_PRODUCT_SLMICRO5 "If enabled, the SLE Micro 5 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
 option(SSG_PRODUCT_UBUNTU1604 "If enabled, the Ubuntu 16.04 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
 option(SSG_PRODUCT_UBUNTU1804 "If enabled, the Ubuntu 18.04 SCAP content will be built" ${SSG_PRODUCT_DEFAULT})
@@ -131,11 +132,9 @@ else()
 endif()
 message(STATUS "PYTHONPATH: $ENV{PYTHONPATH}")
 
-# Setting Python_ADDITIONAL_VERSIONS before calling PythonInterp can influence the priority of
-# python executables in a scenario where multiple versions are present.
-set(Python_ADDITIONAL_VERSIONS 3 2)
 # Required Packages
-find_package(PythonInterp REQUIRED)
+set(Python_FIND_UNVERSIONED_NAMES FIRST)
+find_package(Python REQUIRED)
 find_package(OpenSCAP REQUIRED)
 
 find_program(ANSIBLE_LINT_EXECUTABLE NAMES ansible-lint)
@@ -230,7 +229,7 @@ configure_file("${CMAKE_SOURCE_DIR}/build_config.yml.in" "${CMAKE_BINARY_DIR}/bu
 message(STATUS " ")
 message(STATUS "Summary of Python Tools and Modules:")
 # Required Python Tools
-message(STATUS "python: ${PYTHON_EXECUTABLE} (version: ${PYTHON_VERSION_STRING})")
+message(STATUS "python: ${Python_EXECUTABLE} (version: ${Python_VERSION})")
 message(STATUS "python yaml module: ${PY_YAML}")
 message(STATUS "python jinja2 module: ${PY_JINJA2}")
 # Optional Python Tools
@@ -346,6 +345,7 @@ message(STATUS "RHV 4: ${SSG_PRODUCT_RHV4}")
 message(STATUS "SUSE 12: ${SSG_PRODUCT_SLE12}")
 message(STATUS "SUSE 15: ${SSG_PRODUCT_SLE15}")
 message(STATUS "SLE Micro 5: ${SSG_PRODUCT_SLMICRO5}")
+message(STATUS "TencentOS Server 4: ${SSG_PRODUCT_TENCENTOS4}")
 message(STATUS "Ubuntu 16.04: ${SSG_PRODUCT_UBUNTU1604}")
 message(STATUS "Ubuntu 18.04: ${SSG_PRODUCT_UBUNTU1804}")
 message(STATUS "Ubuntu 20.04: ${SSG_PRODUCT_UBUNTU2004}")
@@ -467,6 +467,9 @@ if(SSG_PRODUCT_SLE15)
 endif()
 if(SSG_PRODUCT_SLMICRO5)
     add_subdirectory("products/slmicro5" "slmicro5")
+endif()
+if(SSG_PRODUCT_TENCENTOS4)
+    add_subdirectory("products/tencentos4" "tencentos4")
 endif()
 if(SSG_PRODUCT_UBUNTU1604)
     add_subdirectory("products/ubuntu1604" "ubuntu1604")
